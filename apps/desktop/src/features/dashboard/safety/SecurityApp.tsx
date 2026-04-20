@@ -5,13 +5,15 @@ import {
   useMemo,
   useRef,
   useState,
+  type ButtonHTMLAttributes,
   type KeyboardEvent,
   type PointerEvent,
+  type ReactNode,
 } from "react";
-import { Badge, Button, Flex, Heading, Text } from "@radix-ui/themes";
 import { useQueryClient } from "@tanstack/react-query";
-import { useLocation, useNavigate } from "react-router-dom";
+import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
+  ArrowLeft,
   ArrowUpRight,
   History,
   ShieldCheck,
@@ -35,13 +37,14 @@ import { JsonRpcClientError } from "@/rpc/client";
 import { subscribeApprovalPending, subscribeTask } from "@/rpc/subscriptions";
 import { loadDashboardDataMode, saveDashboardDataMode } from "@/features/dashboard/shared/dashboardDataMode";
 import { DashboardMockToggle } from "@/features/dashboard/shared/DashboardMockToggle";
+import { dashboardModules } from "@/features/dashboard/shared/dashboardRoutes";
 import {
   isDashboardSafetyApprovalSnapshotOnly,
   resolveDashboardSafetyNavigationRoute,
-  resolveDashboardSafetyFocusTarget,
   resolveDashboardSafetySnapshotLifecycle,
   shouldRetainDashboardSafetyActiveDetail,
 } from "@/features/dashboard/shared/dashboardSafetyNavigation";
+import { cn } from "@/utils/cn";
 import {
   getInitialSecurityModuleData,
   loadSecurityPendingApprovals,
@@ -60,10 +63,9 @@ import {
   type SecurityRestorePointListData,
   type SecurityRespondOutcome,
 } from "./securityService";
-import { resolveDashboardModuleRoutePath } from "@/features/dashboard/shared/dashboardRouteTargets";
+import { resolveDashboardModuleRoutePath, resolveDashboardRoutePath } from "@/features/dashboard/shared/dashboardRouteTargets";
 import { getDashboardTaskSecurityRefreshPlan } from "../tasks/taskPage.query";
 import "./securityPage.css";
-import "./securityBoard.css";
 
 type SecurityCardKey = "status" | "restore" | "budget" | "governance" | `approval:${string}`;
 type CardPosition = { x: number; y: number };
@@ -95,18 +97,114 @@ type SecurityCardPreview = {
 type SecurityRestoreScope = "focused_task" | "all";
 type SecurityAuditScope = "focused_task" | "all";
 type ImpactScopeDetails = NonNullable<AgentSecurityApprovalRespondResult["impact_scope"]>;
+type SecurityButtonVariant = "soft" | "solid";
 
 const STATIC_CARD_KEYS: SecurityCardKey[] = ["status", "restore", "budget", "governance"];
 const DRAG_THRESHOLD = 8;
 const CARD_CLEARANCE = 14;
 const CARD_STEP = 18;
 const BOARD_INSET_X = 22;
-const BOARD_INSET_TOP = 140;
+const BOARD_INSET_TOP = 112;
 const BOARD_INSET_BOTTOM = 24;
 const DEFAULT_CARD_SIZE: CardSize = { width: 248, height: 176 };
 const FALLBACK_POSITION: CardPosition = { x: BOARD_INSET_X, y: BOARD_INSET_TOP };
 const SECURITY_DETAIL_PAGE_SIZE = 8;
 const ALL_AUDIT_TYPES = "__all__";
+
+type SecurityBadgeProps = {
+  children: ReactNode;
+  className?: string;
+  tone: ThemeColor;
+};
+
+type SecurityButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
+  tone?: ThemeColor;
+  variant?: SecurityButtonVariant;
+};
+
+type SecurityTextProps = {
+  as?: "p" | "span";
+  children: ReactNode;
+  className?: string;
+  size?: string;
+};
+
+type SecurityHeadingProps = {
+  children: ReactNode;
+  className?: string;
+  size?: string;
+};
+
+type SecurityFlexProps = {
+  align?: string;
+  children: ReactNode;
+  className?: string;
+  gap?: string;
+  justify?: string;
+  wrap?: string;
+};
+
+function SecurityBadge({ children, className, tone }: SecurityBadgeProps) {
+  return (
+    <span className={cn("security-page__badge", className)} data-tone={tone}>
+      {children}
+    </span>
+  );
+}
+
+function SecurityButton({ children, className, tone = "gray", type, variant = "soft", ...props }: SecurityButtonProps) {
+  return (
+    <button
+      {...props}
+      className={cn("security-page__button", className)}
+      data-tone={tone}
+      data-variant={variant}
+      type={type ?? "button"}
+    >
+      {children}
+    </button>
+  );
+}
+
+function Badge({
+  children,
+  className,
+  color,
+}: {
+  children: ReactNode;
+  className?: string;
+  color: ThemeColor;
+  highContrast?: boolean;
+  variant?: string;
+}) {
+  return (
+    <SecurityBadge className={className} tone={color}>
+      {children}
+    </SecurityBadge>
+  );
+}
+
+function Button({ children, className, color, variant, ...props }: SecurityButtonProps & { color?: ThemeColor }) {
+  return (
+    <SecurityButton className={className} tone={color} variant={variant} {...props}>
+      {children}
+    </SecurityButton>
+  );
+}
+
+function Flex({ children, className }: SecurityFlexProps) {
+  return <div className={cn("security-page__badge-row", className)}>{children}</div>;
+}
+
+function Heading({ children, className }: SecurityHeadingProps) {
+  const Component = className?.includes("security-page__title") ? "h1" : "h2";
+  return <Component className={className}>{children}</Component>;
+}
+
+function Text({ as = "p", children, className }: SecurityTextProps) {
+  const Component = as;
+  return <Component className={className}>{children}</Component>;
+}
 
 function getRiskColor(risk: RiskLevel) {
   if (risk === "red") return "red" as const;
@@ -186,6 +284,26 @@ function getPendingSecurityStatus(pendingCount: number, fallbackStatus: Security
 
 function getVisiblePendingItems(items: ApprovalRequest[], limit: number) {
   return items.slice(0, Math.max(0, limit));
+}
+
+function buildPrioritizedCardKeys(pendingKeys: SecurityCardKey[]) {
+  if (pendingKeys.length === 0) {
+    return STATIC_CARD_KEYS;
+  }
+
+  const leadingPending = pendingKeys[0] ?? null;
+  const secondaryPending = pendingKeys[1] ?? null;
+  const trailingPending = pendingKeys.slice(2);
+
+  return [
+    "status",
+    ...(leadingPending ? [leadingPending] : []),
+    "restore",
+    "budget",
+    ...(secondaryPending ? [secondaryPending] : []),
+    "governance",
+    ...trailingPending,
+  ] satisfies SecurityCardKey[];
 }
 
 function renderDetailEntryList(items: string[], emptyCopy: string, keyPrefix: string) {
@@ -603,6 +721,10 @@ function getCardPreview(
   };
 }
 
+/**
+ * Renders the queue-first safety canvas while keeping approval, restore, and
+ * audit interactions aligned with the existing RPC contract.
+ */
 export function SecurityApp() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -651,7 +773,7 @@ export function SecurityApp() {
     () => (moduleData?.pending ?? []).map((approval) => `approval:${approval.approval_id}` as SecurityCardKey),
     [moduleData?.pending],
   );
-  const cardKeys = useMemo(() => [...STATIC_CARD_KEYS, ...pendingCardKeys], [pendingCardKeys]);
+  const cardKeys = useMemo(() => buildPrioritizedCardKeys(pendingCardKeys), [pendingCardKeys]);
   const canvasRef = useRef<HTMLDivElement | null>(null);
   const dragStateRef = useRef<DragState | null>(null);
   const refreshSequenceRef = useRef(0);
@@ -865,6 +987,15 @@ export function SecurityApp() {
   const bringCardToFront = useCallback((key: SecurityCardKey) => {
     setCardStack((currentStack) => [...currentStack.filter((item) => item !== key), key]);
   }, []);
+
+  const openCardDetail = useCallback(
+    (key: SecurityCardKey) => {
+      setActionError(null);
+      bringCardToFront(key);
+      setActiveDetailKey(key);
+    },
+    [bringCardToFront],
+  );
 
   useEffect(() => {
     if (!moduleData) {
@@ -1171,15 +1302,44 @@ export function SecurityApp() {
     [bringCardToFront, cardKeys],
   );
 
+  const renderDashboardTopbar = () => {
+    return (
+      <header className="dashboard-page__topbar security-page__topbar security-page__topbar--canvas">
+        <Link className="dashboard-page__home-link security-page__home-link" to={resolveDashboardRoutePath("home")}>
+          <ArrowLeft className="h-4 w-4" />
+          返回首页
+        </Link>
+
+        <nav aria-label="Dashboard modules" className="dashboard-page__module-nav security-page__module-nav">
+          {dashboardModules.map((item) => (
+            <NavLink
+              key={item.route}
+              className={({ isActive }) => cn("dashboard-page__module-link", "security-page__module-link", isActive && "is-active")}
+              to={item.path}
+            >
+              {item.title}
+            </NavLink>
+          ))}
+        </nav>
+      </header>
+    );
+  };
+
   if (!moduleData) {
     return (
       <main className="app-shell security-page">
-        <div className="security-page__frame">
-          <div className="security-surface security-page__topbar">
-            <Text>{loadError ? `安全页同步失败：${loadError}` : "正在同步安全数据..."}</Text>
+        <div className="security-page__canvas" aria-label="Security board">
+          {renderDashboardTopbar()}
+          <div className="security-page__load-state">
+            <div className="security-page__detail-callout">
+              {loadError ? `安全页同步失败：${loadError}` : "正在同步安全数据..."}
+            </div>
           </div>
         </div>
-        <DashboardMockToggle enabled={dataMode === "mock"} onToggle={() => setDataMode((current) => (current === "rpc" ? "mock" : "rpc"))} />
+        <DashboardMockToggle
+          enabled={dataMode === "mock"}
+          onToggle={() => setDataMode((current) => (current === "rpc" ? "mock" : "rpc"))}
+        />
       </main>
     );
   }
@@ -1360,7 +1520,7 @@ export function SecurityApp() {
     releaseDrag();
 
     if (!dragState.moved && travelled < DRAG_THRESHOLD) {
-      setActiveDetailKey(key);
+      openCardDetail(key);
     }
   };
 
@@ -1373,10 +1533,13 @@ export function SecurityApp() {
   };
 
   const handleCardKeyDown = (key: SecurityCardKey) => (event: KeyboardEvent<HTMLDivElement>) => {
+    if (event.target !== event.currentTarget) {
+      return;
+    }
+
     if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
-      bringCardToFront(key);
-      setActiveDetailKey(key);
+      openCardDetail(key);
     }
   };
 
@@ -2135,10 +2298,13 @@ export function SecurityApp() {
 
   const renderDraggableCard = (key: SecurityCardKey, index: number) => {
     const preview = getCardPreview(key, moduleData, approvalLookup);
+    const approval = key.startsWith("approval:") ? approvalLookup.get(key as `approval:${string}`) ?? null : null;
     const Icon = preview.icon;
     const isDragging = draggingKey === key;
     const isExpanded = activeDetailKey === key;
+    const isApprovalCard = approval !== null;
     const position = cardPositions[key] ?? FALLBACK_POSITION;
+    const rememberRule = approval ? (rememberRuleByApprovalId[approval.approval_id] ?? false) : false;
     const headlineClassName = [
       "security-page__card-line",
       preview.emphasis ? `security-page__card-line--${preview.emphasis}` : null,
@@ -2150,24 +2316,25 @@ export function SecurityApp() {
       <div
         key={key}
         className={`security-page__draggable${isDragging ? " is-dragging" : ""}${isExpanded ? " is-active" : ""}${boardReady ? " is-ready" : ""}`}
+        data-card-type={isApprovalCard ? "approval" : key}
         style={{
           height: `${cardSize.height}px`,
           transform: `translate3d(${position.x}px, ${position.y}px, 0)`,
           width: `${cardSize.width}px`,
           zIndex: index + 2,
         }}
-        role="button"
-        tabIndex={0}
-        aria-haspopup="dialog"
-        aria-expanded={isExpanded}
+        role={isApprovalCard ? undefined : "button"}
+        tabIndex={isApprovalCard ? undefined : 0}
+        aria-haspopup={isApprovalCard ? undefined : "dialog"}
+        aria-expanded={isApprovalCard ? undefined : isExpanded}
         aria-label={`${preview.title}，可拖动并打开详情`}
         onPointerDown={handleCardPointerDown(key)}
         onPointerMove={handleCardPointerMove(key)}
         onPointerUp={handleCardPointerUp(key)}
         onPointerCancel={handleCardPointerCancel(key)}
-        onKeyDown={handleCardKeyDown(key)}
+        onKeyDown={isApprovalCard ? undefined : handleCardKeyDown(key)}
       >
-        <section className="security-page__card-surface" aria-hidden="true">
+        <section className="security-page__card-surface">
           <div className="security-page__card-shell">
             <div className="security-page__card-top">
               <div className="security-page__card-heading">
@@ -2184,6 +2351,48 @@ export function SecurityApp() {
             <p className={headlineClassName}>{preview.headline}</p>
             <p className="security-page__card-copy">{preview.supporting}</p>
             <p className="security-page__card-meta">{preview.meta}</p>
+            {approval ? (
+              <div className="security-page__card-actions">
+                <button
+                  type="button"
+                  className="security-page__card-action security-page__card-action--ghost"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    openPendingApprovalDetail(approval);
+                  }}
+                  onKeyDown={(event) => event.stopPropagation()}
+                  onPointerDown={(event) => event.stopPropagation()}
+                >
+                  Detail
+                </button>
+                <button
+                  type="button"
+                  className="security-page__card-action security-page__card-action--deny"
+                  disabled={activeApprovalId === approval.approval_id}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    void handleRespond(approval, "deny_once", rememberRule);
+                  }}
+                  onKeyDown={(event) => event.stopPropagation()}
+                  onPointerDown={(event) => event.stopPropagation()}
+                >
+                  Deny
+                </button>
+                <button
+                  type="button"
+                  className="security-page__card-action security-page__card-action--allow"
+                  disabled={activeApprovalId === approval.approval_id}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    void handleRespond(approval, "allow_once", rememberRule);
+                  }}
+                  onKeyDown={(event) => event.stopPropagation()}
+                  onPointerDown={(event) => event.stopPropagation()}
+                >
+                  Allow
+                </button>
+              </div>
+            ) : null}
           </div>
         </section>
       </div>
@@ -2192,35 +2401,20 @@ export function SecurityApp() {
 
   return (
     <main className="app-shell security-page">
-      <div className="security-page__canvas" ref={canvasRef} aria-label="Security 卡片画布">
-        <div className="security-page__hero">
-          <Text as="p" size="1" className="security-page__eyebrow">
-            security
-          </Text>
-          <Heading size="9" className="security-page__title">
-            安全卫士
-          </Heading>
-          <Flex align="center" gap="2" wrap="wrap">
-            <Badge color={sourceBadgeColor} variant="soft" highContrast>
-              {sourceBadgeLabel}
-            </Badge>
-            <Badge color={getStatusColor(moduleData.summary.security_status)} variant="soft" highContrast>
-              {moduleData.summary.security_status}
-            </Badge>
-            <Badge color={moduleData.summary.pending_authorizations > 0 ? "amber" : "gray"} variant="soft" highContrast>
-              {moduleData.summary.pending_authorizations} pending
-            </Badge>
-            <Badge color={moduleData.summary.latest_restore_point ? "orange" : "gray"} variant="soft" highContrast>
-              {moduleData.summary.latest_restore_point ? "restore ready" : "no restore"}
-            </Badge>
-          </Flex>
-          {loadError ? <div className="security-page__detail-callout">同步失败：{loadError}</div> : null}
-        </div>
-
+      <div className="security-page__canvas" ref={canvasRef} aria-label="Security board">
+        {renderDashboardTopbar()}
+        {loadError ? (
+          <div className="security-page__load-state">
+            <div className="security-page__detail-callout">同步失败：{loadError}</div>
+          </div>
+        ) : null}
         {cardStack.map(renderDraggableCard)}
         {renderDetailOverlay()}
       </div>
-      <DashboardMockToggle enabled={dataMode === "mock"} onToggle={() => setDataMode((current) => (current === "rpc" ? "mock" : "rpc"))} />
+      <DashboardMockToggle
+        enabled={dataMode === "mock"}
+        onToggle={() => setDataMode((current) => (current === "rpc" ? "mock" : "rpc"))}
+      />
     </main>
   );
 }

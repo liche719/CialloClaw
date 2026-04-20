@@ -48,6 +48,10 @@ type DashboardHomeProps = {
   voiceOpen: boolean;
 };
 
+/**
+ * Renders the orbit-style dashboard home and keeps hover affordances derived
+ * from the same live module state that drives the existing overview scene.
+ */
 export function DashboardHome({
   data = getDashboardHomeFallbackData(),
   onVoiceOpen,

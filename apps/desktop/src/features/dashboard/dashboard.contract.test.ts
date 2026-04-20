@@ -113,18 +113,70 @@ function loadNotePageServiceModule() {
       resolveNoteResourceOpenExecutionPlan: (resource: {
         id: string;
         label: string;
-        openAction?: "task_detail" | "open_url" | "copy_path" | null;
-        path: string;
+        openAction?: "task_detail" | "open_url" | "open_file" | "reveal_in_folder" | null;
+        path: string | null;
         taskId?: string | null;
         type: string;
         url?: string | null;
       }) => {
-        mode: "task_detail" | "open_url" | "copy_path";
+        mode: "task_detail" | "open_url" | "open_file" | "reveal_in_folder";
         taskId: string | null;
         path: string | null;
+        resolvedPath: string | null;
+        requiresWorkspaceConfirmation: boolean;
         url: string | null;
         feedback: string;
       };
+    },
+  );
+}
+
+function loadDashboardOpenModule() {
+  return withDesktopAliasRuntime((requireFn) =>
+    requireFn(resolve(desktopRoot, ".cache/dashboard-tests/features/dashboard/shared/dashboardOpen.js")) as {
+      createDashboardOpenPlan: (input: {
+        confirmMessage?: string;
+        feedback: string;
+        label: string;
+        missingTargetMessage: string;
+        mode: "task_detail" | "open_url" | "open_file" | "reveal_in_folder";
+        path?: string | null;
+        taskId?: string | null;
+        url?: string | null;
+        workspacePath?: string | null;
+      }) => {
+        confirmMessage: string;
+        feedback: string;
+        label: string;
+        missingTargetMessage: string;
+        mode: "task_detail" | "open_url" | "open_file" | "reveal_in_folder";
+        path: string | null;
+        resolvedPath: string | null;
+        requiresWorkspaceConfirmation: boolean;
+        taskId: string | null;
+        url: string | null;
+        workspacePath: string | null;
+      };
+      isDashboardPathWithinTrustedWorkspace: (absolutePath: string | null | undefined, workspacePath: string | null | undefined) => boolean;
+      performDashboardOpenPlan: (
+        plan: {
+          confirmMessage: string;
+          feedback: string;
+          label: string;
+          missingTargetMessage: string;
+          mode: "task_detail" | "open_url" | "open_file" | "reveal_in_folder";
+          path: string | null;
+          resolvedPath: string | null;
+          requiresWorkspaceConfirmation: boolean;
+          taskId: string | null;
+          url: string | null;
+          workspacePath: string | null;
+        },
+        options?: { approveOutsideWorkspace?: boolean },
+      ) => Promise<{ type: "task_detail" | "opened" | "confirm_required" | "error"; message: string }>;
+      readDashboardOutsideWorkspaceConfirmationSession: () => { approvedForWindow: boolean };
+      resetDashboardOutsideWorkspaceConfirmationSession: () => void;
+      resolveDashboardAbsolutePath: (path: string | null | undefined, workspacePath: string | null | undefined) => string | null;
     },
   );
 }
@@ -138,12 +190,37 @@ function loadTaskOutputServiceModule() {
       openTaskArtifactForTask: (taskId: string, artifactId: string, source: "rpc" | "mock") => Promise<AgentTaskArtifactOpenResult>;
       openTaskDeliveryForTask: (taskId: string, artifactId: string | undefined, source: "rpc" | "mock") => Promise<AgentDeliveryOpenResult>;
       resolveTaskOpenExecutionPlan: (result: AgentTaskArtifactOpenResult | AgentDeliveryOpenResult) => {
-        mode: "task_detail" | "open_url" | "copy_path";
+        mode: "task_detail" | "open_url" | "open_file" | "reveal_in_folder";
         taskId: string | null;
         path: string | null;
+        resolvedPath: string | null;
         url: string | null;
         feedback: string;
       };
+    },
+  );
+}
+
+function loadNoteCanvasLayoutModule() {
+  return withDesktopAliasRuntime((requireFn) =>
+    requireFn(resolve(desktopRoot, ".cache/dashboard-tests/features/dashboard/notes/noteCanvasLayout.js")) as {
+      createNoteCanvasCardLayout: (itemId: string, sourceBucket: "upcoming" | "later" | "recurring_rule" | "closed", point: { x: number; y: number }) => {
+        itemId: string;
+        sourceBucket: "upcoming" | "later" | "recurring_rule" | "closed";
+        x: number;
+        y: number;
+      };
+      findNextNoteCanvasPoint: (snapshot: Record<string, { itemId: string; sourceBucket: "upcoming" | "later" | "recurring_rule" | "closed"; x: number; y: number }>, bounds: { width: number; height: number }) => {
+        x: number;
+        y: number;
+      };
+      pruneNoteCanvasLayoutSnapshot: (
+        snapshot: Record<string, { itemId: string; sourceBucket: "upcoming" | "later" | "recurring_rule" | "closed"; x: number; y: number }>,
+        items: Array<{ item: { item_id: string; bucket: "upcoming" | "later" | "recurring_rule" | "closed" } }>,
+      ) => Record<string, { itemId: string; sourceBucket: "upcoming" | "later" | "recurring_rule" | "closed"; x: number; y: number }>;
+      snapNoteCanvasPoint: (point: { x: number; y: number }, bounds: { width: number; height: number }) => { x: number; y: number };
+      NOTE_CANVAS_CARD_HEIGHT: number;
+      NOTE_CANVAS_CARD_WIDTH: number;
     },
   );
 }
@@ -185,6 +262,14 @@ function loadSettingsServiceModule() {
         };
       };
       saveSettings: (settings: unknown) => void;
+    },
+  );
+}
+
+function loadStorageModule() {
+  return withDesktopAliasRuntime((requireFn) =>
+    requireFn(resolve(desktopRoot, ".cache/dashboard-tests/platform/storage.js")) as {
+      loadStoredValue: <T>(key: string) => T | null;
     },
   );
 }
@@ -386,6 +471,46 @@ function withDesktopAliasRuntime<T>(
     return result;
   } catch (error) {
     restoreRuntime();
+    throw error;
+  }
+}
+
+function withMockWindowLocalStorage<T>(callback: () => T | Promise<T>): T | Promise<T> {
+  const windowHost = globalThis as unknown as {
+    window?: Window;
+  };
+  const originalWindow = windowHost.window;
+
+  windowHost.window = {
+    ...(originalWindow ?? {}),
+    localStorage: {
+      clear: () => {},
+      getItem: () => null,
+      key: () => null,
+      length: 0,
+      removeItem: () => {},
+      setItem: () => {},
+    },
+  } as unknown as Window;
+
+  const restoreWindow = () => {
+    if (originalWindow === undefined) {
+      Reflect.deleteProperty(windowHost, "window");
+    } else {
+      windowHost.window = originalWindow;
+    }
+  };
+
+  try {
+    const result = callback();
+    if (result && typeof (result as Promise<T>).finally === "function") {
+      return (result as Promise<T>).finally(restoreWindow);
+    }
+
+    restoreWindow();
+    return result;
+  } catch (error) {
+    restoreWindow();
     throw error;
   }
 }
@@ -810,14 +935,18 @@ test("task page no longer exposes edit guidance and uses 安全总览 without an
   assert.doesNotMatch(taskPageSource, /action === "edit"/);
 });
 
-test("security board styles stay scoped to the safety feature stylesheet", () => {
+test("security styles stay scoped to the safety feature stylesheet", () => {
   const securityAppSource = readFileSync(resolve(desktopRoot, "src/features/dashboard/safety/SecurityApp.tsx"), "utf8");
+  const securityPageSource = readFileSync(resolve(desktopRoot, "src/features/dashboard/safety/securityPage.css"), "utf8");
   const securityBoardSource = readFileSync(resolve(desktopRoot, "src/features/dashboard/safety/securityBoard.css"), "utf8");
   const globalsSource = readFileSync(resolve(desktopRoot, "src/styles/globals.css"), "utf8");
 
-  assert.match(securityAppSource, /import "\.\/securityBoard\.css";/);
-  assert.match(securityBoardSource, /\.security-page__canvas\s*\{/);
-  assert.match(securityBoardSource, /@media \(max-width: 980px\)[\s\S]*\.security-page__detail-grid\s*\{/);
+  assert.match(securityAppSource, /import "\.\/securityPage\.css";/);
+  assert.doesNotMatch(securityAppSource, /import "\.\/securityBoard\.css";/);
+  assert.match(securityPageSource, /\.security-page__canvas\s*\{/);
+  assert.match(securityPageSource, /\.security-page__draggable\[data-card-type="approval"\]\s+\.security-page__card-surface\s*\{/);
+  assert.match(securityPageSource, /@media \(max-width: 980px\)[\s\S]*\.security-page__detail-grid\s*\{/);
+  assert.match(securityBoardSource, /consolidated into securityPage\.css/);
   assert.doesNotMatch(globalsSource, /\.security-page__canvas\s*\{/);
   assert.doesNotMatch(globalsSource, /\.security-page__draggable\s*\{/);
 });
@@ -859,6 +988,37 @@ test("security audit cards and mirror cards stay aligned with the v6 frontend pr
   assert.match(mirrorAppSource, /overview\.history_summary\[1\] \?\?[\s\S]*latestConversation\?\.agent_text/);
   assert.match(mirrorAppSource, /latestMemoryReference\?\.summary \|\| latestMemoryReference\?\.reason/);
   assert.match(mirrorDetailSource, /reference\.summary \|\| reference\.reason/);
+});
+
+test("shared Button forwards refs so tooltip triggers can anchor without React warnings", () => {
+  const buttonSource = readFileSync(resolve(desktopRoot, "src/components/ui/button.tsx"), "utf8");
+
+  assert.match(buttonSource, /const Button = React\.forwardRef</);
+  assert.match(buttonSource, /ref=\{ref\}/);
+  assert.match(buttonSource, /Button\.displayName = "Button"/);
+});
+
+test("rpc client and subscriptions stop repeating unavailable transport failures across the dashboard", () => {
+  const rpcClientSource = readFileSync(resolve(desktopRoot, "src/rpc/client.ts"), "utf8");
+  const fallbackSource = readFileSync(resolve(desktopRoot, "src/rpc/fallback.ts"), "utf8");
+  const subscriptionsSource = readFileSync(resolve(desktopRoot, "src/rpc/subscriptions.ts"), "utf8");
+
+  assert.match(rpcClientSource, /const DEBUG_HTTP_UNAVAILABLE_COOLDOWN_MS = 10_000;/);
+  assert.match(rpcClientSource, /const debugHttpTransportState: DebugHttpTransportState = \{/);
+  assert.match(rpcClientSource, /if \(this\.shouldShortCircuit\(\)\) \{/);
+  assert.match(rpcClientSource, /if \(state\.pending\) \{/);
+  assert.match(rpcClientSource, /state\.pending = availabilityGate;/);
+  assert.match(rpcClientSource, /function isDebugHttpTransportUnavailable\(error: unknown\)/);
+  assert.match(fallbackSource, /const loggedFallbackScopes = new Set<string>\(\);/);
+  assert.match(fallbackSource, /if \(loggedFallbackScopes\.has\(scope\)\) \{/);
+  assert.match(fallbackSource, /"failed to open named pipe"/);
+  assert.match(subscriptionsSource, /const NAMED_PIPE_SUBSCRIPTION_UNAVAILABLE_COOLDOWN_MS = 10_000;/);
+  assert.match(subscriptionsSource, /let namedPipeSubscriptionsUnavailableAt = 0;/);
+  assert.match(subscriptionsSource, /function shouldShortCircuitNamedPipeSubscriptions\(\)/);
+  assert.match(subscriptionsSource, /if \(isRpcChannelUnavailable\(error\)\) \{/);
+  assert.match(subscriptionsSource, /namedPipeSubscriptionsUnavailableAt = Date\.now\(\);/);
+  assert.match(subscriptionsSource, /clearNamedPipeSubscriptionFailureState\(\);/);
+  assert.match(subscriptionsSource, /\.catch\(handleNamedPipeSubscriptionFailure\)/);
 });
 
 test("task context links back into mirror detail state instead of plain text dead ends", () => {
@@ -1057,6 +1217,44 @@ test("settings service keeps RPC data_log fields authoritative over stale deskto
     assert.equal(persisted.settings.data_log.provider_api_key_configured, true);
     assert.equal(persisted.settings.models.provider, "anthropic");
     assert.equal(persisted.settings.models.provider_api_key_configured, true);
+  } finally {
+    if (originalWindow === undefined) {
+      Reflect.deleteProperty(globalThis, "window");
+    } else {
+      Object.assign(globalThis, { window: originalWindow });
+    }
+  }
+});
+
+test("local storage helpers clear corrupted JSON snapshots instead of throwing", () => {
+  const { loadStoredValue } = loadStorageModule();
+  const originalWindow = globalThis.window;
+  const storage = new Map<string, string>();
+  const localStorage = {
+    getItem(key: string) {
+      return storage.get(key) ?? null;
+    },
+    setItem(key: string, value: string) {
+      storage.set(key, value);
+    },
+    removeItem(key: string) {
+      storage.delete(key);
+    },
+  };
+
+  Object.assign(globalThis, {
+    window: {
+      localStorage,
+    },
+  });
+
+  try {
+    localStorage.setItem("dashboard.notes.canvas-layout", "{not-json");
+
+    const loaded = loadStoredValue<Record<string, unknown>>("dashboard.notes.canvas-layout");
+
+    assert.equal(loaded, null);
+    assert.equal(localStorage.getItem("dashboard.notes.canvas-layout"), null);
   } finally {
     if (originalWindow === undefined) {
       Reflect.deleteProperty(globalThis, "window");
@@ -1392,151 +1590,412 @@ test("TaskPage wiring helpers require real detail for safety focus and keep deta
   assert.equal(shouldEnableDashboardTaskDetailQuery(null, true), false);
 });
 
-test("task output helpers normalize open actions from existing rpc contracts", async () => {
-  const outputService = loadTaskOutputServiceModule();
+test("TaskPage keeps route-focused task details renderable before task buckets catch up", () => {
+  const taskPageSource = readFileSync(resolve(desktopRoot, "src/features/dashboard/tasks/TaskPage.tsx"), "utf8");
+  const taskMockSource = readFileSync(resolve(desktopRoot, "src/features/dashboard/tasks/taskPage.mock.ts"), "utf8");
 
-  assert.deepEqual(
-    outputService.resolveTaskOpenExecutionPlan({
-      open_action: "task_detail",
-      resolved_payload: { path: null, url: null, task_id: "task_dashboard_001" },
-      delivery_result: {
-        type: "task_detail",
-        title: "Task detail",
-        preview_text: "回到任务详情",
-        payload: { path: null, url: null, task_id: "task_dashboard_001" },
+  assert.match(taskPageSource, /requestedTaskId/);
+  assert.match(taskPageSource, /routeFocusTaskId/);
+  assert.match(taskPageSource, /selectedDetailTaskId/);
+  assert.match(taskMockSource, /createAdHocMockTask/);
+  assert.match(taskMockSource, /const detail = mockDetailsState\[taskId\];/);
+});
+
+test("TaskPage routes local and route-driven task focus through one guarded stage helper", () => {
+  const taskPageSource = readFileSync(resolve(desktopRoot, "src/features/dashboard/tasks/TaskPage.tsx"), "utf8");
+
+  assert.match(taskPageSource, /function focusTaskDetail\(taskId: string, openDetail = true\)/);
+  assert.match(taskPageSource, /setRequestedTaskId\(taskId\);\s*setSelectedTaskId\(taskId\);\s*setDetailOpen\(openDetail\);/s);
+  assert.match(taskPageSource, /focusTaskDetail\(routeFocusTaskId, routeFocusState\?\.openDetail \?\? true\);/);
+  assert.match(taskPageSource, /function handleSelectTask\(taskId: string\)\s*{\s*focusTaskDetail\(taskId\);\s*}/s);
+});
+
+test("TaskPreviewCard keeps task selection resilient when frameless pointer clicks get swallowed", () => {
+  const previewCardSource = readFileSync(resolve(desktopRoot, "src/features/dashboard/tasks/components/TaskPreviewCard.tsx"), "utf8");
+
+  assert.match(previewCardSource, /function handlePointerSelect\(event: PointerEvent<HTMLButtonElement>\)/);
+  assert.match(previewCardSource, /if \(!event\.isPrimary \|\| event\.button !== 0\) \{/);
+  assert.match(previewCardSource, /function handleKeyboardSelect\(event: MouseEvent<HTMLButtonElement>\)/);
+  assert.match(previewCardSource, /Pointer-triggered selection is handled on pointer-up/);
+  assert.match(previewCardSource, /if \(event\.detail !== 0\) \{/);
+  assert.match(previewCardSource, /onClick=\{handleKeyboardSelect\}/);
+  assert.match(previewCardSource, /onPointerUp=\{handlePointerSelect\}/);
+});
+
+test("task stage keeps rotated task clusters above the stage hitbox", () => {
+  const taskPageCssSource = readFileSync(resolve(desktopRoot, "src/features/dashboard/tasks/taskPage.css"), "utf8");
+
+  assert.match(taskPageCssSource, /Keep the rotated task clusters above the center stage/);
+  assert.match(taskPageCssSource, /\.task-cloud__stage\s*{\s*min-height:\s*0;\s*z-index:\s*1;\s*}/s);
+  assert.match(taskPageCssSource, /\.task-cluster\s*{\s*min-height:\s*0;\s*z-index:\s*2;\s*}/s);
+});
+
+test("task page keeps task cards inside no-drag surfaces and avoids collapsing peek card hit areas", () => {
+  const taskPageCssSource = readFileSync(resolve(desktopRoot, "src/features/dashboard/tasks/taskPage.css"), "utf8");
+
+  assert.match(taskPageCssSource, /stealing pointer input away from/);
+  assert.match(taskPageCssSource, /\.task-tower-page \.dashboard-page__topbar\s*{\s*\/\*[\s\S]*?-webkit-app-region:\s*no-drag;\s*app-region:\s*no-drag;/s);
+  assert.match(taskPageCssSource, /\.task-preview-card\s*{\s*-webkit-app-region:\s*no-drag;\s*app-region:\s*no-drag;/s);
+  assert.match(taskPageCssSource, /\.task-runway__manifest\.is-condensed\s*{\s*gap:\s*0\.65rem;\s*}/s);
+  assert.match(taskPageCssSource, /\.task-preview-card--peeked\s*{\s*margin-top:\s*0;/s);
+  assert.match(taskPageCssSource, /\.task-preview-card--peeked \+ \.task-preview-card--peeked\s*{\s*margin-top:\s*0;/s);
+});
+
+test("dashboard open helpers require one-time confirmation only for outside-workspace desktop paths", async () => {
+  const dashboardOpen = loadDashboardOpenModule();
+  const windowHost = globalThis as unknown as {
+    window?: Window;
+  };
+  const originalWindow = windowHost.window;
+  const invokeCalls: Array<{ command: string; args?: Record<string, unknown> }> = [];
+  const openedUrls: string[] = [];
+
+  windowHost.window = {
+    __TAURI_INTERNALS__: {
+      invoke: async (command: string, args?: Record<string, unknown>) => {
+        invokeCalls.push({ command, args });
+        return null;
       },
-    }),
-    {
-      mode: "task_detail",
-      taskId: "task_dashboard_001",
-      path: null,
-      url: null,
-      feedback: "已定位到任务详情。",
     },
-  );
+    open: (url: string | URL | undefined) => {
+      openedUrls.push(String(url));
+      return null;
+    },
+  } as unknown as Window;
 
-  assert.deepEqual(
-    outputService.resolveTaskOpenExecutionPlan({
-      open_action: "result_page",
-      resolved_payload: { path: null, url: "https://example.test/result", task_id: "task_dashboard_001" },
-      delivery_result: {
-        type: "result_page",
-        title: "Result page",
-        preview_text: "打开结果页",
-        payload: { path: null, url: "https://example.test/result", task_id: "task_dashboard_001" },
+  dashboardOpen.resetDashboardOutsideWorkspaceConfirmationSession();
+
+  try {
+    const insidePlan = dashboardOpen.createDashboardOpenPlan({
+      feedback: "已打开工作区文件。",
+      label: "Spec draft",
+      missingTargetMessage: "missing",
+      mode: "open_file",
+      path: "workspace/drafts/spec.md",
+      workspacePath: "D:/CialloClawWorkspace",
+    });
+
+    assert.equal(insidePlan.resolvedPath, "D:/CialloClawWorkspace/drafts/spec.md");
+    assert.equal(insidePlan.requiresWorkspaceConfirmation, false);
+    assert.equal(
+      dashboardOpen.isDashboardPathWithinTrustedWorkspace(
+        insidePlan.resolvedPath,
+        "D:/CialloClawWorkspace",
+      ),
+      true,
+    );
+
+    const insideResult = await dashboardOpen.performDashboardOpenPlan(insidePlan);
+    assert.equal(insideResult.type, "opened");
+    assert.equal(insideResult.message, "已打开工作区文件。");
+
+    const outsidePlan = dashboardOpen.createDashboardOpenPlan({
+      feedback: "已打开仓库资源。",
+      label: "Repo doc",
+      missingTargetMessage: "missing",
+      mode: "open_file",
+      path: "docs/dashboard-design.md",
+      workspacePath: "D:/CialloClawWorkspace",
+    });
+
+    assert.equal(
+      dashboardOpen.resolveDashboardAbsolutePath(
+        "docs/dashboard-design.md",
+        "D:/CialloClawWorkspace",
+      ),
+      null,
+    );
+    assert.equal(outsidePlan.requiresWorkspaceConfirmation, true);
+    const outsideConfirmationResult =
+      await dashboardOpen.performDashboardOpenPlan(outsidePlan);
+    assert.equal(outsideConfirmationResult.type, "confirm_required");
+    assert.equal(outsideConfirmationResult.message, outsidePlan.confirmMessage);
+    assert.equal(
+      dashboardOpen.readDashboardOutsideWorkspaceConfirmationSession().approvedForWindow,
+      false,
+    );
+
+    const approvedOutsideResult = await dashboardOpen.performDashboardOpenPlan(
+      outsidePlan,
+      {
+        approveOutsideWorkspace: true,
       },
-    }),
-    {
+    );
+    assert.equal(approvedOutsideResult.type, "opened");
+    assert.equal(approvedOutsideResult.message, "已打开仓库资源。");
+    assert.equal(
+      dashboardOpen.readDashboardOutsideWorkspaceConfirmationSession().approvedForWindow,
+      true,
+    );
+
+    const secondOutsidePlan = dashboardOpen.createDashboardOpenPlan({
+      feedback: "已定位仓库目录。",
+      label: "Repo folder",
+      missingTargetMessage: "missing",
+      mode: "reveal_in_folder",
+      path: "apps/desktop/src/features/dashboard/tasks",
+      workspacePath: "D:/CialloClawWorkspace",
+    });
+    const secondOutsideResult =
+      await dashboardOpen.performDashboardOpenPlan(secondOutsidePlan);
+    assert.equal(secondOutsideResult.type, "opened");
+    assert.equal(secondOutsideResult.message, "已定位仓库目录。");
+
+    const urlPlan = dashboardOpen.createDashboardOpenPlan({
+      feedback: "已打开网页。",
+      label: "Spec site",
+      missingTargetMessage: "missing",
       mode: "open_url",
-      taskId: "task_dashboard_001",
-      path: null,
-      url: "https://example.test/result",
-      feedback: "已打开结果页。",
-    },
-  );
+      url: "https://example.test/spec",
+    });
+    const urlResult = await dashboardOpen.performDashboardOpenPlan(urlPlan);
+    assert.equal(urlResult.type, "opened");
+    assert.equal(urlResult.message, "已打开网页。");
+    assert.deepEqual(openedUrls, ["https://example.test/spec"]);
+    assert.deepEqual(
+      invokeCalls.map((entry) => ({ args: entry.args, command: entry.command })),
+      [
+        {
+          args: {
+            action: "open_file",
+            path: "D:/CialloClawWorkspace/drafts/spec.md",
+          },
+          command: "desktop_open_resource",
+        },
+        {
+          args: {
+            action: "open_file",
+            path: "docs/dashboard-design.md",
+          },
+          command: "desktop_open_resource",
+        },
+        {
+          args: {
+            action: "reveal_in_folder",
+            path: "apps/desktop/src/features/dashboard/tasks",
+          },
+          command: "desktop_open_resource",
+        },
+      ],
+    );
+
+    dashboardOpen.resetDashboardOutsideWorkspaceConfirmationSession();
+    assert.equal(
+      dashboardOpen.readDashboardOutsideWorkspaceConfirmationSession().approvedForWindow,
+      false,
+    );
+  } finally {
+    if (originalWindow === undefined) {
+      Reflect.deleteProperty(windowHost, "window");
+    } else {
+      windowHost.window = originalWindow;
+    }
+  }
+});
+
+test("note canvas layout keeps grid snapping inside padding and prunes notes that drift into closed", () => {
+  const canvasLayout = loadNoteCanvasLayoutModule();
 
   assert.deepEqual(
-    outputService.resolveTaskOpenExecutionPlan({
-      artifact: {
-        artifact_id: "artifact_dashboard_001",
-        artifact_type: "workspace_document",
-        mime_type: "text/tsx",
-        path: "apps/desktop/src/features/dashboard/tasks/TaskPage.tsx",
-        task_id: "task_dashboard_001",
-        title: "TaskPage.tsx",
-      },
-      open_action: "open_file",
-      resolved_payload: { path: "apps/desktop/src/features/dashboard/tasks/TaskPage.tsx", url: null, task_id: "task_dashboard_001" },
-      delivery_result: {
-        type: "open_file",
-        title: "TaskPage.tsx",
-        preview_text: "打开文件",
-        payload: { path: "apps/desktop/src/features/dashboard/tasks/TaskPage.tsx", url: null, task_id: "task_dashboard_001" },
-      },
-    }),
-    {
-      mode: "copy_path",
-      taskId: "task_dashboard_001",
-      path: "apps/desktop/src/features/dashboard/tasks/TaskPage.tsx",
-      url: null,
-      feedback: "当前环境暂不支持直接打开，已准备复制路径。",
-    },
+    canvasLayout.snapNoteCanvasPoint(
+      { x: 3, y: 9 },
+      { width: 800, height: 620 },
+    ),
+    { x: 28, y: 28 },
   );
+
+  const initialSnapshot = {
+    note_upcoming_001: canvasLayout.createNoteCanvasCardLayout("note_upcoming_001", "upcoming", {
+      x: 28,
+      y: 28,
+    }),
+    note_closed_001: canvasLayout.createNoteCanvasCardLayout("note_closed_001", "closed", {
+      x: 52,
+      y: 52,
+    }),
+  };
+  const nextPoint = canvasLayout.findNextNoteCanvasPoint(initialSnapshot, {
+    width: 800,
+    height: 620,
+  });
+  assert.notDeepEqual(nextPoint, { x: 28, y: 28 });
+
+  const prunedSnapshot = canvasLayout.pruneNoteCanvasLayoutSnapshot(initialSnapshot, [
+    { item: { item_id: "note_upcoming_001", bucket: "closed" } },
+    { item: { item_id: "note_closed_001", bucket: "closed" } },
+  ]);
+
+  assert.deepEqual(Object.keys(prunedSnapshot), ["note_closed_001"]);
+});
+
+test("task output helpers normalize open actions from existing rpc contracts", async () => {
+  await withMockWindowLocalStorage(async () => {
+    const outputService = loadTaskOutputServiceModule();
+
+    assert.deepEqual(
+      outputService.resolveTaskOpenExecutionPlan({
+        open_action: "task_detail",
+        resolved_payload: { path: null, url: null, task_id: "task_dashboard_001" },
+        delivery_result: {
+          type: "task_detail",
+          title: "Task detail",
+          preview_text: "回到任务详情",
+          payload: { path: null, url: null, task_id: "task_dashboard_001" },
+        },
+      }),
+      {
+        mode: "task_detail",
+        taskId: "task_dashboard_001",
+        path: null,
+        resolvedPath: null,
+        url: null,
+        feedback: "已定位到任务详情。",
+      },
+    );
+
+    assert.deepEqual(
+      outputService.resolveTaskOpenExecutionPlan({
+        open_action: "result_page",
+        resolved_payload: { path: null, url: "https://example.test/result", task_id: "task_dashboard_001" },
+        delivery_result: {
+          type: "result_page",
+          title: "Result page",
+          preview_text: "打开结果页",
+          payload: { path: null, url: "https://example.test/result", task_id: "task_dashboard_001" },
+        },
+      }),
+      {
+        mode: "open_url",
+        taskId: "task_dashboard_001",
+        path: null,
+        resolvedPath: null,
+        url: "https://example.test/result",
+        feedback: "已打开结果页。",
+      },
+    );
+
+    assert.deepEqual(
+      outputService.resolveTaskOpenExecutionPlan({
+        artifact: {
+          artifact_id: "artifact_dashboard_001",
+          artifact_type: "workspace_document",
+          mime_type: "text/tsx",
+          path: "apps/desktop/src/features/dashboard/tasks/TaskPage.tsx",
+          task_id: "task_dashboard_001",
+          title: "TaskPage.tsx",
+        },
+        open_action: "open_file",
+        resolved_payload: { path: "apps/desktop/src/features/dashboard/tasks/TaskPage.tsx", url: null, task_id: "task_dashboard_001" },
+        delivery_result: {
+          type: "open_file",
+          title: "TaskPage.tsx",
+          preview_text: "打开文件",
+          payload: { path: "apps/desktop/src/features/dashboard/tasks/TaskPage.tsx", url: null, task_id: "task_dashboard_001" },
+        },
+      }),
+      {
+        mode: "open_file",
+        taskId: "task_dashboard_001",
+        path: "apps/desktop/src/features/dashboard/tasks/TaskPage.tsx",
+        resolvedPath: null,
+        url: null,
+        feedback: "已打开结果文件。",
+      },
+    );
+  });
 });
 
 test("task output service exposes artifact list and open flows in mock mode", async () => {
-  const outputService = loadTaskOutputServiceModule();
+  await withMockWindowLocalStorage(async () => {
+    const outputService = loadTaskOutputServiceModule();
 
-  const artifactPage = await outputService.loadTaskArtifactPage("task_done_001", "mock");
-  assert.ok(artifactPage.items.length > 0);
-  assert.equal(artifactPage.page.offset, 0);
+    const artifactPage = await outputService.loadTaskArtifactPage("task_done_001", "mock");
+    assert.ok(artifactPage.items.length > 0);
+    assert.equal(artifactPage.page.offset, 0);
 
-  const artifactOpen = await outputService.openTaskArtifactForTask("task_done_001", "artifact_done_003", "mock");
-  assert.equal(artifactOpen.open_action, "reveal_in_folder");
+    const artifactOpen = await outputService.openTaskArtifactForTask("task_done_001", "artifact_done_003", "mock");
+    assert.equal(artifactOpen.open_action, "reveal_in_folder");
 
-  const deliveryOpen = await outputService.openTaskDeliveryForTask("task_done_001", undefined, "mock");
-  assert.equal(deliveryOpen.delivery_result.payload.task_id, "task_done_001");
+    const deliveryOpen = await outputService.openTaskDeliveryForTask("task_done_001", undefined, "mock");
+    assert.equal(deliveryOpen.delivery_result.payload.task_id, "task_done_001");
 
-  assert.equal(
-    outputService.describeTaskOpenResultForCurrentTask(
-      {
-        mode: "task_detail",
-        taskId: "task_done_001",
-      },
-      "task_done_001",
-    ),
-    "当前任务没有独立可打开结果，请先查看成果区。",
-  );
+    assert.equal(
+      outputService.describeTaskOpenResultForCurrentTask(
+        {
+          mode: "task_detail",
+          taskId: "task_done_001",
+        },
+        "task_done_001",
+      ),
+      "当前任务没有独立可打开结果，请先查看成果区。",
+    );
 
-  assert.equal(outputService.isAllowedTaskOpenUrl("https://example.test/result"), true);
-  assert.equal(outputService.isAllowedTaskOpenUrl("http://example.test/result"), true);
-  assert.equal(outputService.isAllowedTaskOpenUrl("javascript:alert(1)"), false);
-  assert.equal(outputService.isAllowedTaskOpenUrl("file:///tmp/out.txt"), false);
+    assert.equal(outputService.isAllowedTaskOpenUrl("https://example.test/result"), true);
+    assert.equal(outputService.isAllowedTaskOpenUrl("http://example.test/result"), true);
+    assert.equal(outputService.isAllowedTaskOpenUrl("javascript:alert(1)"), false);
+    assert.equal(outputService.isAllowedTaskOpenUrl("file:///tmp/out.txt"), false);
+  });
 });
 
-test("note resource open helpers normalize task, url, and copy flows", () => {
-  const noteService = loadNotePageServiceModule();
+test("note resource open helpers normalize task, url, file, and reveal flows", () => {
+  withMockWindowLocalStorage(() => {
+    const noteService = loadNotePageServiceModule();
 
-  const taskPlan = noteService.resolveNoteResourceOpenExecutionPlan({
-    id: "note_resource_001",
-    label: "Task detail",
-    openAction: "task_detail",
-    path: "apps/desktop/src/features/dashboard/tasks/TaskPage.tsx",
-    taskId: "task_dashboard_001",
-    type: "task",
-    url: null,
+    const taskPlan = noteService.resolveNoteResourceOpenExecutionPlan({
+      id: "note_resource_001",
+      label: "Task detail",
+      openAction: "task_detail",
+      path: "apps/desktop/src/features/dashboard/tasks/TaskPage.tsx",
+      taskId: "task_dashboard_001",
+      type: "task",
+      url: null,
+    });
+    assert.equal(taskPlan.mode, "task_detail");
+    assert.equal(taskPlan.taskId, "task_dashboard_001");
+    assert.equal(taskPlan.resolvedPath, null);
+
+    const urlPlan = noteService.resolveNoteResourceOpenExecutionPlan({
+      id: "note_resource_002",
+      label: "Spec",
+      openAction: "open_url",
+      path: "",
+      taskId: null,
+      type: "doc",
+      url: "https://example.test/spec",
+    });
+    assert.equal(urlPlan.mode, "open_url");
+    assert.equal(urlPlan.url, "https://example.test/spec");
+
+    const filePlan = noteService.resolveNoteResourceOpenExecutionPlan({
+      id: "note_resource_003",
+      label: "Draft",
+      openAction: "open_file",
+      path: "workspace/drafts/spec.md",
+      taskId: null,
+      type: "draft",
+      url: null,
+    });
+    assert.equal(filePlan.mode, "open_file");
+    assert.equal(filePlan.path, "workspace/drafts/spec.md");
+    assert.equal(filePlan.resolvedPath, "D:/CialloClawWorkspace/drafts/spec.md");
+
+    const revealPlan = noteService.resolveNoteResourceOpenExecutionPlan({
+      id: "note_resource_004",
+      label: "Dashboard folder",
+      openAction: "reveal_in_folder",
+      path: "apps/desktop/src/features/dashboard",
+      taskId: null,
+      type: "folder",
+      url: null,
+    });
+    assert.equal(revealPlan.mode, "reveal_in_folder");
+    assert.equal(revealPlan.requiresWorkspaceConfirmation, true);
+
+    assert.equal(noteService.isAllowedNoteOpenUrl("https://example.test/spec"), true);
+    assert.equal(noteService.isAllowedNoteOpenUrl("http://example.test/spec"), true);
+    assert.equal(noteService.isAllowedNoteOpenUrl("javascript:alert(1)"), false);
+    assert.equal(noteService.isAllowedNoteOpenUrl("file:///tmp/spec.md"), false);
   });
-  assert.equal(taskPlan.mode, "task_detail");
-  assert.equal(taskPlan.taskId, "task_dashboard_001");
-
-  const urlPlan = noteService.resolveNoteResourceOpenExecutionPlan({
-    id: "note_resource_002",
-    label: "Spec",
-    openAction: "open_url",
-    path: "",
-    taskId: null,
-    type: "doc",
-    url: "https://example.test/spec",
-  });
-  assert.equal(urlPlan.mode, "open_url");
-  assert.equal(urlPlan.url, "https://example.test/spec");
-
-  const copyPlan = noteService.resolveNoteResourceOpenExecutionPlan({
-    id: "note_resource_003",
-    label: "Draft",
-    openAction: "copy_path",
-    path: "workspace/drafts/spec.md",
-    taskId: null,
-    type: "draft",
-    url: null,
-  });
-  assert.equal(copyPlan.mode, "copy_path");
-  assert.equal(copyPlan.path, "workspace/drafts/spec.md");
-
-  assert.equal(noteService.isAllowedNoteOpenUrl("https://example.test/spec"), true);
-  assert.equal(noteService.isAllowedNoteOpenUrl("http://example.test/spec"), true);
-  assert.equal(noteService.isAllowedNoteOpenUrl("javascript:alert(1)"), false);
-  assert.equal(noteService.isAllowedNoteOpenUrl("file:///tmp/spec.md"), false);
 });
 
 test("task page adopts rpc output helpers directly in the task detail panel", () => {
@@ -1548,6 +2007,8 @@ test("task page adopts rpc output helpers directly in the task detail panel", ()
   assert.match(taskPageSource, /loadTaskArtifactPage/);
   assert.match(taskPageSource, /openTaskArtifactForTask/);
   assert.match(taskPageSource, /openTaskDeliveryForTask/);
+  assert.match(taskPageSource, /pendingConfirmation/);
+  assert.match(taskPageSource, /confirm_required/);
   assert.match(taskPageSource, /subscribeDeliveryReady\(\(payload\) =>/);
   assert.match(taskPageSource, /payload\.task_id/);
   assert.doesNotMatch(taskPageSource, /\["dashboard", "tasks", "artifacts"/);
@@ -1562,18 +2023,27 @@ test("task page adopts rpc output helpers directly in the task detail panel", ()
   assert.doesNotMatch(taskOutputSource, /isRpcChannelUnavailable/);
   assert.doesNotMatch(taskOutputSource, /logRpcMockFallback/);
   assert.match(taskOutputSource, /isAllowedTaskOpenUrl/);
+  assert.doesNotMatch(taskOutputSource, /copy_path/);
 });
 
 test("note page consumes note query helpers instead of inlining note bucket contracts", () => {
   const notePageSource = readFileSync(resolve(desktopRoot, "src/features/dashboard/notes/NotePage.tsx"), "utf8");
   const noteServiceSource = readFileSync(resolve(desktopRoot, "src/features/dashboard/notes/notePage.service.ts"), "utf8");
+  const noteCssSource = readFileSync(resolve(desktopRoot, "src/features/dashboard/notes/notePage.css"), "utf8");
 
   assert.match(notePageSource, /buildDashboardNoteBucketQueryKey/);
   assert.match(notePageSource, /buildDashboardNoteBucketInvalidateKeys/);
   assert.match(notePageSource, /getDashboardNoteRefreshPlan/);
+  assert.match(notePageSource, /note-workbench__drawer-group/);
+  assert.match(notePageSource, /note-workbench__canvas-card/);
+  assert.match(notePageSource, /note-workbench__detail-layer/);
+  assert.match(notePageSource, /pendingConfirmation/);
   assert.doesNotMatch(notePageSource, /\["dashboard", "notes", "bucket", dataMode/);
+  assert.doesNotMatch(notePageSource, /copy_path/);
   assert.match(noteServiceSource, /isAllowedNoteOpenUrl/);
   assert.match(noteServiceSource, /mode === "open_url"/);
+  assert.match(noteCssSource, /\.note-workbench__drawer-group\.is-expanded/);
+  assert.match(noteCssSource, /\.note-workbench__detail-layer/);
 });
 
 test("task fallback copy no longer claims backend output actions are missing", () => {

@@ -1,11 +1,8 @@
-import { DashboardBackHomeLink } from "@/features/dashboard/shared/DashboardBackHomeLink";
 import { SecurityPageShell } from "./SecurityPageShell";
 
+/**
+ * Exposes the safety dashboard route through the shared security shell.
+ */
 export function SafetyPage() {
-  return (
-    <>
-      <DashboardBackHomeLink />
-      <SecurityPageShell />
-    </>
-  );
+  return <SecurityPageShell />;
 }

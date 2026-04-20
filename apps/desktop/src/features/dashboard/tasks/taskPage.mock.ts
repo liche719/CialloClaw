@@ -39,7 +39,7 @@ function createApprovalRequest(taskId: string, approvalId: string, riskLevel: Ap
 const baseTasks: Task[] = [
   {
     task_id: "task_focus_001",
-    title: "把任务页整理成可爱又克制的未来感任务舱",
+    title: "把任务页整理成可爱又克制的云岛剧场",
     source_type: "dragged_file",
     status: "processing",
     intent: { name: "design_task_page", arguments: { mood: "soft_future" } },
@@ -63,7 +63,7 @@ const baseTasks: Task[] = [
   },
   {
     task_id: "task_focus_003",
-    title: "把最近便签整理成任务舱所需的上下文提示",
+    title: "把最近便签整理成任务页所需的上下文提示",
     source_type: "todo",
     status: "paused",
     intent: { name: "organize_notes", arguments: { output: "context" } },
@@ -139,7 +139,7 @@ const taskExperiences: Record<string, TaskExperience> = {
   task_focus_001: {
     priority: "critical",
     dueAt: iso(DAY),
-    goal: "把当前任务页整理成一个聚焦推进单任务的未来感任务舱，让人第一眼就知道正在做什么、下一步该怎么推进。",
+    goal: "把当前任务页整理成一个聚焦推进单任务的云岛剧场，让人第一眼就知道正在做什么、下一步该怎么推进。",
     phase: "正在把详情、子任务、产出和笔记四个内容层整理成一组连贯舱室。",
     nextAction: "先把主任务区的呼吸感和 tabs 内容面板定型，再回头收细底部操作键与成果区。",
     progressHint: "当前正在打磨主任务区，离可交付版本还差产出区与动作区收口。",
@@ -185,7 +185,7 @@ const taskExperiences: Record<string, TaskExperience> = {
       },
     ],
     quickContext: [
-      { id: "ctx_001", label: "最近对话", content: "任务页必须像未来感任务舱，而不是企业后台。" },
+      { id: "ctx_001", label: "最近对话", content: "任务页必须像有呼吸感的云岛剧场，而不是企业后台。" },
       { id: "ctx_002", label: "用户约束", content: "可爱但不幼稚，炫酷但不赛博朋克。" },
       { id: "ctx_003", label: "关键提醒", content: "底部动作区要像软胶按键，不能做成普通工具栏。" },
     ],
@@ -500,7 +500,7 @@ const taskExperiences: Record<string, TaskExperience> = {
     ],
     recentConversation: ["任务页要和悬浮球属于同一世界观。", "可爱但要克制。"],
     suggestedNext: "把悬浮球的软质按钮感迁到任务页底部动作条。",
-    assistantState: { label: "待命", hint: "视觉参考已经准备好，接下来重点是落地任务舱页面。" },
+    assistantState: { label: "待命", hint: "视觉参考已经准备好，接下来重点是落地云岛剧场页面。" },
     outputs: [
       { id: "output_022", label: "当前草稿", content: "无。", tone: "draft" },
       { id: "output_023", label: "已生成结果", content: "悬浮球的世界观资料已经可直接参考。", tone: "result" },
@@ -566,7 +566,7 @@ const baseDetails: Record<string, AgentTaskDetailGetResult> = {
     { security_status: "normal", risk_level: "green", pending_authorizations: 0, latest_restore_point: null },
     [
       { memory_id: "mem_task_page_soft_future", reason: "任务页需要继承悬浮球的暖白与蓝灰冷调。", summary: "保持软胶质感、磨砂玻璃和低打扰留白。" },
-      { memory_id: "mem_task_page_single_focus", reason: "任务页应聚焦推进当前一个任务，而不是管理一堆任务。", summary: "用主任务舱 + 辅助区组织信息，而不是后台式双栏表格。" },
+      { memory_id: "mem_task_page_single_focus", reason: "任务页应聚焦推进当前一个任务，而不是管理一堆任务。", summary: "用中心舞台 + 漂浮任务岛组织信息，而不是后台式双栏表格。" },
       { memory_id: "mem_task_page_quiet_motion", reason: "动效必须克制，高级，不可出现夸张霓虹与过重 bounce。", summary: "主任务区轻呼吸、tabs 淡入位移、Sheet 像舱门滑开即可。" },
     ],
   ),
@@ -728,6 +728,111 @@ export function getTaskExperience(taskId: string) {
   return taskExperiences[taskId];
 }
 
+/*
+function createAdHocMockTask(taskId: string): Task {
+  const nowIso = new Date().toISOString();
+
+  return {
+    current_step: "cross_module_focus",
+    finished_at: null,
+    intent: { name: "open_task_detail", arguments: { task_id: taskId } },
+    risk_level: "green",
+    source_type: "todo",
+    started_at: nowIso,
+    status: "processing",
+    task_id: taskId,
+    title: `鍏宠仈浠诲姟 ${taskId.slice(-4).toUpperCase()}`,
+    updated_at: nowIso,
+  };
+}
+
+function createAdHocMockExperience(task: Task): TaskExperience {
+  return {
+    acceptance: ["璺ㄦā鍧楄烦杞椂鍙互绋冲畾鎵撳紑浠诲姟璇︽儏銆?],
+    assistantState: {
+      hint: "褰撳墠浣跨敤鐨勬槸 mock 妯″紡涓嬬殑涓存椂浠诲姟璇︽儏锛岀敤鏉ユ壙鎺ヨ法妯″潡鐨勪换鍔¤烦杞€?,
+      label: "detail focus",
+    },
+    background: "杩欐槸涓€鏉¤法妯″潡璺宠浆鍒颁换鍔￠〉鐨勪复鏃朵换鍔¤鍥撅紝鍏堜繚璇佽鎯呭彲鐢紝涓嶈鐣岄潰鍥炶惤鍒伴粯璁ょず渚嬨€?,
+    constraints: ["涓嶆柊澧炲崗璁瓧娈点€?, "淇濇寔褰撳墠 task detail 鍜屽畨鍏ㄨ烦杞摼璺€?],
+    dueAt: null,
+    goal: task.title,
+    nextAction: "鍏堟煡鐪嬪綋鍓嶄换鍔¤鎯咃紝鍐嶅喅瀹氭槸鍚︾户缁帹杩涖€?,
+    noteDraft: "璇ヤ换鍔℃潵鑷叾浠栨ā鍧楃殑璺宠浆鑱氱劍锛屽綋鍓嶅厛浣跨敤鏈€灏忚鎯呰鏄庢壙鎺ャ€?,
+    noteEntries: ["濡傛灉鍚庣画鎺ユ敹鍒版洿瀹屾暣鐨?task detail锛岄〉闈細鑷姩鍚屾銆?],
+    outputs: [
+      {
+        id: `${task.task_id}_snapshot`,
+        label: "褰撳墠蹇収",
+        content: "杩欐潯浠诲姟鏆傛椂浠ユ渶灏忓彲鐢ㄨ鎯呭舰鎬佹壙鎺ヨ法妯″潡璺宠浆銆?,
+        tone: "draft",
+      },
+    ],
+    phase: "cross module detail focus",
+    priority: "steady",
+    progressHint: "璇ヤ换鍔¤繕娌℃湁鍥炲埌褰撳墠鍒楄〃锛屽厛浠ヨ鎯呮ā寮忔壙鎺ャ€?,
+    quickContext: [
+      { id: `${task.task_id}_ctx_source`, label: "鏉ユ簮", content: "褰撳墠浠诲姟鏄粠鍏朵粬 dashboard 妯″潡璺宠浆杩涙潵鐨勩€? },
+    ],
+    recentConversation: ["璇︽儏褰撳墠鐢?mock 妯″紡涓嬬殑涓存椂 task 鏁版嵁鎵挎帴銆?],
+    relatedFiles: [],
+    stepTargets: {},
+    suggestedNext: "濡傛灉鍚庣画鍥炲埌浠诲姟鍒楄〃锛屽彲浠ユ巿鏉冩垨缁х画杩欐潯浠诲姟銆?,
+  };
+}
+
+*/
+
+function createAdHocMockTask(taskId: string): Task {
+  const nowIso = new Date().toISOString();
+
+  return {
+    current_step: "cross_module_focus",
+    finished_at: null,
+    intent: { name: "open_task_detail", arguments: { task_id: taskId } },
+    risk_level: "green",
+    source_type: "todo",
+    started_at: nowIso,
+    status: "processing",
+    task_id: taskId,
+    title: `Linked task ${taskId.slice(-4).toUpperCase()}`,
+    updated_at: nowIso,
+  };
+}
+
+function createAdHocMockExperience(task: Task): TaskExperience {
+  return {
+    acceptance: ["Cross-module jumps should still land on a readable task detail."],
+    assistantState: {
+      hint: "This temporary mock detail keeps cross-module task links usable before the task appears in the stage buckets.",
+      label: "detail focus",
+    },
+    background: "This is a temporary mock-stage detail used when another module asks the task page to focus a task that is not yet present in the current task buckets.",
+    constraints: ["Do not add new protocol fields.", "Keep the task detail and safety deep-link behavior intact."],
+    dueAt: null,
+    goal: task.title,
+    nextAction: "Inspect the current detail first, then decide whether to continue from the source module or from the task page.",
+    noteDraft: "This task was opened from another dashboard module, so the detail page uses a minimal temporary summary until richer task data becomes available.",
+    noteEntries: ["If the formal task detail arrives later, the page will refresh automatically."],
+    outputs: [
+      {
+        id: `${task.task_id}_snapshot`,
+        label: "Current snapshot",
+        content: "This task is temporarily rendered with the smallest viable detail shape so cross-module navigation stays usable in mock mode.",
+        tone: "draft",
+      },
+    ],
+    phase: "cross module detail focus",
+    priority: "steady",
+    progressHint: "This task has not reached the visible stage buckets yet, so the page is rendering its detail directly.",
+    quickContext: [{ id: `${task.task_id}_ctx_source`, label: "Source", content: "This task was opened from another dashboard module." }],
+    recentConversation: ["Mock mode is temporarily supplying the detail payload for this task link."],
+    relatedFiles: [],
+    stepTargets: {},
+    suggestedNext: "If the task later appears in the stage buckets, you can continue it from the regular task flow.",
+  };
+}
+
 export function getMockTaskBuckets() {
   const items: TaskListItem[] = mockTasksState.map((task) => ({
     task,
@@ -760,13 +865,24 @@ export function getMockTaskBuckets() {
 }
 
 export function getMockTaskDetail(taskId: string): TaskDetailData {
-  const detail = mockDetailsState[taskId] ?? mockDetailsState.task_focus_001;
+  const detail = mockDetailsState[taskId];
+
+  if (detail) {
+    return {
+      detail: clone(detail),
+      experience: taskExperiences[detail.task.task_id],
+      source: "mock",
+      task: clone(detail.task),
+    };
+  }
+
+  const task = createAdHocMockTask(taskId);
 
   return {
-    detail: clone(detail),
-    experience: taskExperiences[detail.task.task_id],
+    detail: createDetail(task, [], [], { latest_restore_point: null, pending_authorizations: 0, risk_level: "green", security_status: "normal" }, []),
+    experience: createAdHocMockExperience(task),
     source: "mock",
-    task: clone(detail.task),
+    task: clone(task),
   };
 }
 

@@ -69,6 +69,7 @@ export function DashboardEntranceOrb({ config, dimmed, isHovered, offset, onClic
   const orbitY = Math.sin(rad) * config.orbitRadius + offset.y * 0.16;
   const x = dragPos ? dragPos.x : orbitX;
   const y = dragPos ? dragPos.y : orbitY;
+  const showHoverMeta = isHovered && !isDragging;
 
   const handleMouseDown = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
@@ -156,6 +157,7 @@ export function DashboardEntranceOrb({ config, dimmed, isHovered, offset, onClic
     <motion.button
       animate={{ opacity: dimmed ? 0.28 : 1, scale: isDragging ? 1.12 : isHovered ? 1.08 : 1 }}
       className="dashboard-orbit-entrance"
+      data-hovered={showHoverMeta ? "true" : "false"}
       data-snapping={isSnapping ? "true" : "false"}
       onClick={(event) => {
         event.stopPropagation();
