@@ -429,6 +429,31 @@ function withDesktopAliasRuntime<T>(
   }
 }
 
+function createLocalStorageMock() {
+  const state = new Map<string, string>();
+
+  return {
+    clear() {
+      state.clear();
+    },
+    getItem(key: string) {
+      return state.has(key) ? state.get(key) ?? null : null;
+    },
+    key(index: number) {
+      return Array.from(state.keys())[index] ?? null;
+    },
+    get length() {
+      return state.size;
+    },
+    removeItem(key: string) {
+      state.delete(key);
+    },
+    setItem(key: string, value: string) {
+      state.set(key, value);
+    },
+  };
+}
+
 function createTask(overrides: Partial<Task> = {}): Task {
   return {
     task_id: "task_dashboard_001",
@@ -2176,6 +2201,67 @@ test("dashboard home consumes task module runtime summaries for focus-task visib
   assert.match(serviceSource, /waiting_auth_tasks/);
   assert.match(serviceSource, /focusTaskId === expectedFocusTaskId/);
   assert.match(serviceSource, /runtimeSummary\.latest_event_type === "loop\.retrying"/);
+});
+
+test("dashboard onboarding stays local to desktop storage and reopens when the stored guide version is stale", () => {
+  const localStorage = createLocalStorageMock();
+  const globalObject = globalThis as object;
+  const hadWindow = Reflect.has(globalObject, "window");
+  const previousWindow = hadWindow ? Reflect.get(globalObject, "window") : undefined;
+  Reflect.set(globalObject, "window", { localStorage });
+
+  try {
+    withDesktopAliasRuntime((requireFn) => {
+      const onboardingModule = requireFn(resolve(desktopRoot, "src/features/dashboard/home/dashboardHomeOnboarding.ts")) as {
+        loadDashboardFirstUseGuideState: () => {
+          dismissedAt: string | null;
+          shouldShow: boolean;
+          version: number;
+        };
+        markDashboardFirstUseGuideSeen: (dismissedAt?: string) => void;
+      };
+
+      const initialState = onboardingModule.loadDashboardFirstUseGuideState();
+      assert.equal(initialState.shouldShow, true);
+      assert.equal(initialState.dismissedAt, null);
+
+      onboardingModule.markDashboardFirstUseGuideSeen("2026-04-22T12:00:00.000Z");
+
+      const seenState = onboardingModule.loadDashboardFirstUseGuideState();
+      assert.equal(seenState.shouldShow, false);
+      assert.equal(seenState.dismissedAt, "2026-04-22T12:00:00.000Z");
+
+      localStorage.setItem(
+        "cialloclaw.dashboard.first-use-guide",
+        JSON.stringify({
+          dismissed_at: "2026-04-21T09:00:00.000Z",
+          version: 0,
+        }),
+      );
+
+      const staleState = onboardingModule.loadDashboardFirstUseGuideState();
+      assert.equal(staleState.shouldShow, true);
+      assert.equal(staleState.dismissedAt, null);
+      assert.equal(staleState.version, seenState.version);
+    });
+  } finally {
+    if (!hadWindow) {
+      Reflect.deleteProperty(globalObject, "window");
+    } else {
+      Reflect.set(globalObject, "window", previousWindow);
+    }
+  }
+});
+
+test("DashboardHome keeps a first-use guide overlay and a manual reopen entry on the orbit home route", () => {
+  const homeSource = readFileSync(resolve(desktopRoot, "src/app/dashboard/DashboardHome.tsx"), "utf8");
+
+  assert.match(homeSource, /loadDashboardFirstUseGuideState/);
+  assert.match(homeSource, /markDashboardFirstUseGuideSeen/);
+  assert.match(homeSource, /第一次怎么用/);
+  assert.match(homeSource, /长按中心球，说一句自然话/);
+  assert.match(homeSource, /围绕现场对象继续发起协作/);
+  assert.match(homeSource, /四个工作台舱位/);
 });
 
 test("dashboard validators read enum truth sources from protocol exports", () => {

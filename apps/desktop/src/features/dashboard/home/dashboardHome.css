@@ -45,6 +45,13 @@
   z-index: 20;
 }
 
+.dashboard-orbit-home__hud-actions {
+  align-items: center;
+  display: flex;
+  gap: 0.75rem;
+  pointer-events: auto;
+}
+
 .dashboard-orbit-home__badge-shell,
 .dashboard-orbit-home__shortcut-pill,
 .dashboard-orbit-home__focus-hint {
@@ -84,10 +91,264 @@
   padding: 0.72rem 0.95rem;
 }
 
+.dashboard-orbit-home__guide-trigger {
+  align-items: center;
+  backdrop-filter: blur(14px);
+  background: linear-gradient(135deg, rgba(255, 249, 239, 0.92), rgba(250, 236, 213, 0.82));
+  border: 1px solid rgba(173, 143, 108, 0.26);
+  border-radius: 999px;
+  box-shadow: 0 16px 30px rgba(168, 145, 120, 0.14);
+  color: rgba(95, 84, 75, 0.82);
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 0.76rem;
+  font-weight: 700;
+  gap: 0.5rem;
+  letter-spacing: 0.06em;
+  padding: 0.74rem 1rem;
+  transition:
+    box-shadow 180ms ease,
+    transform 180ms ease,
+    border-color 180ms ease;
+}
+
+.dashboard-orbit-home__guide-trigger:hover {
+  border-color: rgba(173, 143, 108, 0.42);
+  box-shadow: 0 18px 34px rgba(168, 145, 120, 0.2);
+  transform: translateY(-1px);
+}
+
+.dashboard-orbit-home__guide-trigger:focus-visible {
+  box-shadow:
+    0 0 0 2px rgba(255, 251, 245, 0.96),
+    0 0 0 5px rgba(228, 184, 103, 0.24),
+    0 18px 34px rgba(168, 145, 120, 0.18);
+  outline: none;
+}
+
 .dashboard-orbit-home__canvas {
   height: 100vh;
   position: relative;
   width: 100%;
+}
+
+.dashboard-orbit-home__guide-layer {
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+  z-index: 24;
+}
+
+.dashboard-orbit-home__guide-backdrop {
+  backdrop-filter: blur(6px);
+  background:
+    radial-gradient(circle at 18% 22%, rgba(255, 255, 255, 0.66), transparent 28%),
+    linear-gradient(180deg, rgba(248, 239, 229, 0.34), rgba(240, 226, 207, 0.5));
+  border: 0;
+  cursor: pointer;
+  inset: 0;
+  pointer-events: auto;
+  position: absolute;
+}
+
+.dashboard-orbit-home__guide-shell {
+  animation: dashboard-orbit-guide-enter 460ms cubic-bezier(0.22, 1, 0.36, 1);
+  backdrop-filter: blur(22px);
+  background:
+    radial-gradient(circle at top right, rgba(255, 255, 255, 0.84), transparent 34%),
+    linear-gradient(180deg, rgba(255, 250, 243, 0.95), rgba(247, 239, 229, 0.9));
+  border: 1px solid rgba(162, 137, 113, 0.2);
+  border-radius: 2rem;
+  box-shadow:
+    0 28px 84px rgba(123, 91, 59, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.76);
+  left: clamp(1.35rem, 3.2vw, 2.4rem);
+  max-height: calc(100vh - 8rem);
+  max-width: min(45rem, calc(100vw - 3rem));
+  overflow: auto;
+  padding: 1.4rem;
+  pointer-events: auto;
+  position: absolute;
+  top: 5.35rem;
+  width: calc(100vw - 3rem);
+}
+
+.dashboard-orbit-home__guide-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.dashboard-orbit-home__guide-eyebrow {
+  color: rgba(136, 102, 74, 0.72);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.dashboard-orbit-home__guide-title {
+  color: rgba(88, 69, 52, 0.96);
+  font-size: clamp(1.5rem, 2vw, 2rem);
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+}
+
+.dashboard-orbit-home__guide-copy {
+  color: rgba(99, 82, 66, 0.82);
+  font-size: 0.96rem;
+  line-height: 1.6;
+  max-width: 38rem;
+}
+
+.dashboard-orbit-home__guide-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 1.25rem;
+}
+
+.dashboard-orbit-home__guide-card {
+  background: rgba(255, 252, 247, 0.74);
+  border: 1px solid rgba(171, 145, 116, 0.16);
+  border-radius: 1.5rem;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.78);
+  display: flex;
+  flex-direction: column;
+  gap: 0.95rem;
+  padding: 1rem;
+}
+
+.dashboard-orbit-home__guide-card--hero {
+  background:
+    radial-gradient(circle at top right, rgba(255, 232, 194, 0.44), transparent 38%),
+    rgba(255, 252, 247, 0.84);
+  grid-column: span 2;
+}
+
+.dashboard-orbit-home__guide-section-label {
+  color: rgba(136, 102, 74, 0.78);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.dashboard-orbit-home__guide-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.dashboard-orbit-home__guide-item {
+  align-items: flex-start;
+  display: flex;
+  gap: 0.8rem;
+}
+
+.dashboard-orbit-home__guide-item-icon {
+  align-items: center;
+  background: rgba(236, 214, 186, 0.54);
+  border: 1px solid rgba(180, 148, 117, 0.2);
+  border-radius: 1rem;
+  color: rgba(127, 93, 60, 0.84);
+  display: inline-flex;
+  flex: 0 0 auto;
+  height: 2.3rem;
+  justify-content: center;
+  margin-top: 0.1rem;
+  width: 2.3rem;
+}
+
+.dashboard-orbit-home__guide-item-body {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.dashboard-orbit-home__guide-item-title {
+  color: rgba(88, 69, 52, 0.94);
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.dashboard-orbit-home__guide-item-copy {
+  color: rgba(103, 86, 70, 0.78);
+  font-size: 0.88rem;
+  line-height: 1.55;
+}
+
+.dashboard-orbit-home__guide-actions {
+  align-items: center;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  margin-top: 1.2rem;
+}
+
+.dashboard-orbit-home__guide-actions-copy {
+  color: rgba(114, 96, 80, 0.7);
+  font-size: 0.82rem;
+  line-height: 1.5;
+  max-width: 20rem;
+}
+
+.dashboard-orbit-home__guide-action-row {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.dashboard-orbit-home__guide-button {
+  align-items: center;
+  border-radius: 999px;
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 0.86rem;
+  font-weight: 700;
+  justify-content: center;
+  min-height: 2.85rem;
+  min-width: 7.5rem;
+  padding: 0 1.15rem;
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    border-color 180ms ease,
+    background 180ms ease;
+}
+
+.dashboard-orbit-home__guide-button:hover {
+  transform: translateY(-1px);
+}
+
+.dashboard-orbit-home__guide-button:focus-visible {
+  box-shadow:
+    0 0 0 2px rgba(255, 251, 245, 0.94),
+    0 0 0 5px rgba(228, 184, 103, 0.24);
+  outline: none;
+}
+
+.dashboard-orbit-home__guide-button--ghost {
+  background: rgba(255, 252, 247, 0.7);
+  border: 1px solid rgba(170, 145, 118, 0.22);
+  color: rgba(104, 87, 72, 0.84);
+}
+
+.dashboard-orbit-home__guide-button--ghost:hover {
+  border-color: rgba(170, 145, 118, 0.36);
+}
+
+.dashboard-orbit-home__guide-button--primary {
+  background: linear-gradient(135deg, #f3be7a, #e39d67);
+  border: 1px solid rgba(183, 121, 72, 0.24);
+  box-shadow: 0 14px 24px rgba(213, 149, 85, 0.2);
+  color: rgba(87, 55, 28, 0.92);
+}
+
+.dashboard-orbit-home__guide-button--primary:hover {
+  box-shadow: 0 18px 28px rgba(213, 149, 85, 0.28);
 }
 
 .dashboard-orbit-rings {
@@ -1169,7 +1430,27 @@
   }
 }
 
+@keyframes dashboard-orbit-guide-enter {
+  0% {
+    opacity: 0;
+    transform: translateY(18px) scale(0.98);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
 @media (max-width: 1100px) {
+  .dashboard-orbit-home__guide-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-orbit-home__guide-card--hero {
+    grid-column: auto;
+  }
+
   .dashboard-orbit-home__focus-bar {
     align-items: flex-start;
     flex-direction: column;
@@ -1188,6 +1469,11 @@
   .dashboard-orbit-home__hud {
     flex-direction: column;
     gap: 0.75rem;
+  }
+
+  .dashboard-orbit-home__hud-actions {
+    flex-wrap: wrap;
+    justify-content: center;
   }
 
   .dashboard-orbit-home__canvas {
@@ -1209,5 +1495,31 @@
 
   .dashboard-orbit-home__focus-main {
     max-width: none;
+  }
+
+  .dashboard-orbit-home__guide-shell {
+    left: 1rem;
+    max-height: calc(100vh - 7rem);
+    padding: 1rem;
+    right: 1rem;
+    top: 6.4rem;
+    width: auto;
+  }
+
+  .dashboard-orbit-home__guide-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .dashboard-orbit-home__guide-actions-copy {
+    max-width: none;
+  }
+
+  .dashboard-orbit-home__guide-action-row {
+    width: 100%;
+  }
+
+  .dashboard-orbit-home__guide-button {
+    flex: 1 1 0;
   }
 }
