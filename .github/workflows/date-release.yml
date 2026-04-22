@@ -237,7 +237,8 @@ jobs:
             throw new Error('apps/desktop/src-tauri/tauri.conf.json was not rewritten to the release version.');
           }
 
-          if (!cargoToml.includes('version = \\\"' + version + '\\\"')) {
+          const packageVersionPattern = new RegExp('^version = \"' + version.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&') + '\"$', 'm');
+          if (!packageVersionPattern.test(cargoToml)) {
             throw new Error('apps/desktop/src-tauri/Cargo.toml was not rewritten to the release version.');
           }
           "
