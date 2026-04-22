@@ -79,7 +79,7 @@ function DashboardRoutes() {
   const queryClient = useQueryClient();
   const isOpening = useDashboardDomainExpansion();
   const [voiceOpen, setVoiceOpen] = useState(false);
-  const handledTaskDetailRequestIdRef = useRef<string | null>(null);
+  const handledTaskDetailRequestIdsRef = useRef<Map<string, number>>(new Map());
   const dashboardHomeQuery = useQuery({
     queryKey: ["dashboard", "home"],
     queryFn: loadDashboardHomeData,
@@ -105,14 +105,25 @@ function DashboardRoutes() {
   useEffect(() => {
     let disposed = false;
     let cleanup: (() => void) | null = null;
+    const handledRequestTtlMs = 3_000;
 
     void getCurrentWindow()
       .listen<DashboardTaskDetailOpenRequest>(dashboardTaskDetailNavigationEvent, ({ payload }) => {
-        if (handledTaskDetailRequestIdRef.current === payload.request_id) {
+        const now = Date.now();
+        for (const [requestId, handledAt] of handledTaskDetailRequestIdsRef.current) {
+          if (now - handledAt > handledRequestTtlMs) {
+            handledTaskDetailRequestIdsRef.current.delete(requestId);
+          }
+        }
+
+        // Shell-ball replays the same request after a short delay so a freshly
+        // mounted dashboard can still receive it. Keep a small TTL cache of
+        // handled request ids so delayed retries cannot override newer focus.
+        if (handledTaskDetailRequestIdsRef.current.has(payload.request_id)) {
           return;
         }
 
-        handledTaskDetailRequestIdRef.current = payload.request_id;
+        handledTaskDetailRequestIdsRef.current.set(payload.request_id, now);
         setVoiceOpen(false);
         navigateToDashboardTaskDetail(navigate, payload.task_id);
       })

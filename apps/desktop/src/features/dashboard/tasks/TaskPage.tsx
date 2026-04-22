@@ -94,12 +94,8 @@ export function TaskPage() {
   }, [selectedTaskId]);
 
   useEffect(() => {
-    if (allTasks.length === 0) {
-      return;
-    }
-
     const detailRouteState = readDashboardTaskDetailRouteState(location.state);
-    if (detailRouteState && allTasks.some((item) => item.task.task_id === detailRouteState.focusTaskId)) {
+    if (detailRouteState) {
       setSelectedTaskId(detailRouteState.focusTaskId);
       if (detailRouteState.openDetail) {
         setDetailOpen(true);
@@ -108,8 +104,14 @@ export function TaskPage() {
       return;
     }
 
+    if (allTasks.length === 0) {
+      return;
+    }
+
     const selectedExists = selectedTaskId ? allTasks.some((item) => item.task.task_id === selectedTaskId) : false;
-    if (selectedExists) {
+    // Keep routed task-detail targets focused while the canonical detail query
+    // loads, even if the preview buckets have not loaded that task yet.
+    if (selectedExists || (selectedTaskId && detailOpen)) {
       return;
     }
 
@@ -117,7 +119,7 @@ export function TaskPage() {
     if (nextTask) {
       setSelectedTaskId(nextTask.task.task_id);
     }
-  }, [allTasks, finishedTasks, location.pathname, location.state, navigate, selectedTaskId, unfinishedTasks]);
+  }, [allTasks, detailOpen, finishedTasks, location.pathname, location.state, navigate, selectedTaskId, unfinishedTasks]);
 
   const taskDetailQuery = useQuery({
     enabled: shouldEnableDashboardTaskDetailQuery(selectedTaskId, detailOpen),
