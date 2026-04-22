@@ -82,6 +82,10 @@ function loadDashboardTaskDetailNavigationSource() {
   return readFileSync(resolve(desktopRoot, "src/features/dashboard/shared/dashboardTaskDetailNavigation.ts"), "utf8");
 }
 
+function loadDashboardRootSource() {
+  return readFileSync(resolve(desktopRoot, "src/app/dashboard/DashboardRoot.tsx"), "utf8");
+}
+
 function loadTaskPageQueryModule() {
   return withDesktopAliasRuntime((requireFn) =>
     requireFn(resolve(desktopRoot, ".cache/dashboard-tests/features/dashboard/tasks/taskPage.query.js")) as {
@@ -1784,6 +1788,7 @@ test("task page adopts rpc output helpers directly in the task detail panel", ()
   const taskDetailSource = readFileSync(resolve(desktopRoot, "src/features/dashboard/tasks/components/TaskDetailPanel.tsx"), "utf8");
   const taskOutputSource = readFileSync(resolve(desktopRoot, "src/features/dashboard/tasks/taskOutput.service.ts"), "utf8");
   const taskDetailNavigationSource = loadDashboardTaskDetailNavigationSource();
+  const dashboardRootSource = loadDashboardRootSource();
 
   assert.match(taskPageSource, /buildDashboardTaskArtifactQueryKey/);
   assert.match(taskPageSource, /loadTaskArtifactPage/);
@@ -1806,6 +1811,8 @@ test("task page adopts rpc output helpers directly in the task detail panel", ()
   assert.match(taskOutputSource, /isAllowedTaskOpenUrl/);
   assert.match(taskOutputSource, /onOpenTaskDetail/);
   assert.match(taskDetailNavigationSource, /requestDashboardTaskDetailOpen/);
+  assert.match(dashboardRootSource, /handledTaskDetailRequestIdsRef/);
+  assert.match(dashboardRootSource, /handledTaskDetailRequestIdsRef\.current\.has\(payload\.request_id\)/);
 });
 
 test("note page consumes note query helpers instead of inlining note bucket contracts", () => {
@@ -2236,6 +2243,16 @@ test("task runtime event queries key and service include filter dimensions and t
   assert.match(serviceSource, /created_at_from/);
   assert.match(serviceSource, /created_at_to/);
   assert.match(serviceSource, /timeRange: "all"/);
+});
+
+test("task page route-state focus does not depend on the current preview buckets", () => {
+  const taskPageSource = readFileSync(resolve(desktopRoot, "src/features/dashboard/tasks/TaskPage.tsx"), "utf8");
+
+  assert.match(taskPageSource, /const detailRouteState = readDashboardTaskDetailRouteState\(location\.state\);/);
+  assert.match(taskPageSource, /if \(detailRouteState\) \{/);
+  assert.match(taskPageSource, /if \(allTasks\.length === 0\) \{/);
+  assert.match(taskPageSource, /selectedExists \|\| \(selectedTaskId && detailOpen\)/);
+  assert.doesNotMatch(taskPageSource, /detailRouteState && allTasks\.some/);
 });
 
 test("dashboard home consumes task module runtime summaries for focus-task visibility", () => {
