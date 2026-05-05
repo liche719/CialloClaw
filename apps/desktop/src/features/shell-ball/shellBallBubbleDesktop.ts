@@ -56,6 +56,8 @@ export type ShellBallBubbleInlineErrorSignalState = {
 export type ShellBallBubbleIntentConfirmState = {
   intentName: string;
   intentLabel: string;
+  sessionId?: string;
+  pageContext?: PageContext;
 };
 export type ShellBallBubbleDesktopState = {
   lifecycleState: ShellBallBubbleDesktopLifecycleState;
@@ -118,6 +120,7 @@ function cloneShellBallBubbleIntentConfirmState(
 ): ShellBallBubbleIntentConfirmState {
   return {
     ...state,
+    ...(state.pageContext ? { pageContext: { ...state.pageContext } } : {}),
   };
 }
 export function cloneShellBallBubbleDesktopState(state: ShellBallBubbleDesktopState): ShellBallBubbleDesktopState {
