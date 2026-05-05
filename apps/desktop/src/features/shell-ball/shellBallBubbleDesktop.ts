@@ -48,6 +48,15 @@ export type ShellBallBubbleInlineErrorSignalState = {
   status: "idle" | "submitting";
   pageContext?: PageContext;
 };
+
+/**
+ * Intent confirmation metadata is local bubble chrome used to expose the
+ * current inferred intent without changing the protocol bubble payload.
+ */
+export type ShellBallBubbleIntentConfirmState = {
+  intentName: string;
+  intentLabel: string;
+};
 export type ShellBallBubbleDesktopState = {
   lifecycleState: ShellBallBubbleDesktopLifecycleState;
   freshnessHint?: ShellBallBubbleDesktopFreshnessHint;
@@ -58,6 +67,7 @@ export type ShellBallBubbleDesktopState = {
   inlineApproval?: ShellBallBubbleInlineApprovalState;
   inlineRecommendation?: ShellBallBubbleInlineRecommendationState;
   inlineErrorSignal?: ShellBallBubbleInlineErrorSignalState;
+  intentConfirm?: ShellBallBubbleIntentConfirmState;
 };
 
 export type ShellBallBubbleItem = {
@@ -102,6 +112,14 @@ function cloneShellBallBubbleInlineErrorSignalState(
     ...(state.pageContext ? { pageContext: { ...state.pageContext } } : {}),
   };
 }
+
+function cloneShellBallBubbleIntentConfirmState(
+  state: ShellBallBubbleIntentConfirmState,
+): ShellBallBubbleIntentConfirmState {
+  return {
+    ...state,
+  };
+}
 export function cloneShellBallBubbleDesktopState(state: ShellBallBubbleDesktopState): ShellBallBubbleDesktopState {
   return {
     ...state,
@@ -112,6 +130,7 @@ export function cloneShellBallBubbleDesktopState(state: ShellBallBubbleDesktopSt
     ...(state.inlineErrorSignal
       ? { inlineErrorSignal: cloneShellBallBubbleInlineErrorSignalState(state.inlineErrorSignal) }
       : {}),
+    ...(state.intentConfirm ? { intentConfirm: cloneShellBallBubbleIntentConfirmState(state.intentConfirm) } : {}),
   };
 }
 
