@@ -1,5 +1,5 @@
 .mirror-page {
-  --mirror-font-display: var(--cc-font-display);
+  --mirror-font-display: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "STSong", "SimSun";
   --mirror-font-body: var(--cc-font-ui);
   --mirror-space-1: 0.55rem;
   --mirror-space-2: 0.8rem;

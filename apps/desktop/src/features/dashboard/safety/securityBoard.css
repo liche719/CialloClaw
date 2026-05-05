@@ -1,5 +1,5 @@
 .security-page {
-  --security-font-display: var(--cc-font-display);
+  --security-font-display: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "STSong", "SimSun";
   --security-font-body: var(--cc-font-ui);
   --security-space-1: 0.5rem;
   --security-space-2: 0.8rem;
