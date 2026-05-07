@@ -139,7 +139,6 @@ import { useShellBallStore } from "../../stores/shellBallStore";
 import {
   areShellBallSelectionSnapshotsEqual,
 } from "./selection/selection.provider";
-import { normalizeDesktopErrorSignalText } from "../../platform/desktopErrorSignal";
 import { rememberConversationPageContextFromTask } from "../../services/conversationSessionService";
 
 const desktopRoot = process.cwd();
