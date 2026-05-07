@@ -319,6 +319,8 @@ export function ShellBallApp({ isDev = false }: ShellBallAppProps) {
     handleSelectedTextPrompt: handleCoordinatorSelectedTextPrompt,
     handlePrimaryAction: handleCoordinatorPrimaryAction,
     handleBubbleAction: handleCoordinatorBubbleAction,
+    handleErrorSignalAccept: handleCoordinatorErrorSignalAccept,
+    handleErrorSignalIgnore: handleCoordinatorErrorSignalIgnore,
     handleRecommendationAccept: handleCoordinatorRecommendationAccept,
     handleRecommendationIgnore: handleCoordinatorRecommendationIgnore,
     handleConfirmIntentBubble: handleCoordinatorConfirmIntentBubble,
@@ -1033,6 +1035,8 @@ export function ShellBallApp({ isDev = false }: ShellBallAppProps) {
                   }}
                   onConfirmIntentBubble={handleCoordinatorConfirmIntentBubble}
                   onRefineIntentBubble={handleCoordinatorRefineIntentBubble}
+                  onAcceptErrorSignalBubble={handleCoordinatorErrorSignalAccept}
+                  onIgnoreErrorSignalBubble={handleCoordinatorErrorSignalIgnore}
                   onAcceptRecommendationBubble={handleCoordinatorRecommendationAccept}
                   onIgnoreRecommendationBubble={handleCoordinatorRecommendationIgnore}
                   onPinBubble={(bubbleId) => {

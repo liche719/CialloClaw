@@ -39,6 +39,17 @@ export type ShellBallBubbleInlineRecommendationState = {
 };
 
 /**
+ * Inline error-intake metadata keeps the explicit `error_detected` shortcut in
+ * the local shell-ball bubble chrome until the user promotes it into a formal
+ * task start.
+ */
+export type ShellBallBubbleInlineErrorSignalState = {
+  errorText: string;
+  status: "idle" | "submitting";
+  pageContext?: PageContext;
+};
+
+/**
  * Intent confirmation metadata is local bubble chrome used to expose the
  * current inferred intent without changing the protocol bubble payload.
  */
@@ -59,6 +70,7 @@ export type ShellBallBubbleDesktopState = {
   turnPhase?: number;
   inlineApproval?: ShellBallBubbleInlineApprovalState;
   inlineRecommendation?: ShellBallBubbleInlineRecommendationState;
+  inlineErrorSignal?: ShellBallBubbleInlineErrorSignalState;
   intentConfirm?: ShellBallBubbleIntentConfirmState;
 };
 
@@ -96,6 +108,15 @@ function cloneShellBallBubbleInlineRecommendationState(
   };
 }
 
+function cloneShellBallBubbleInlineErrorSignalState(
+  state: ShellBallBubbleInlineErrorSignalState,
+): ShellBallBubbleInlineErrorSignalState {
+  return {
+    ...state,
+    ...(state.pageContext ? { pageContext: { ...state.pageContext } } : {}),
+  };
+}
+
 function cloneShellBallBubbleIntentConfirmState(
   state: ShellBallBubbleIntentConfirmState,
 ): ShellBallBubbleIntentConfirmState {
@@ -111,6 +132,9 @@ export function cloneShellBallBubbleDesktopState(state: ShellBallBubbleDesktopSt
     ...(state.inlineApproval ? { inlineApproval: cloneShellBallBubbleInlineApprovalState(state.inlineApproval) } : {}),
     ...(state.inlineRecommendation
       ? { inlineRecommendation: cloneShellBallBubbleInlineRecommendationState(state.inlineRecommendation) }
+      : {}),
+    ...(state.inlineErrorSignal
+      ? { inlineErrorSignal: cloneShellBallBubbleInlineErrorSignalState(state.inlineErrorSignal) }
       : {}),
     ...(state.intentConfirm ? { intentConfirm: cloneShellBallBubbleIntentConfirmState(state.intentConfirm) } : {}),
   };
