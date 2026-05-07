@@ -1,8 +1,8 @@
-﻿# CialloClaw 鍒嗗伐瀹夋帓鍜屼紭鍏堢骇鍒掑垎锛堜慨璁㈢増 v15锛?
+# CialloClaw 分工安排和优先级划分（修订版 v15）
 
-## 1. 鏂囨。鐩殑
+## 1. 文档目的
 
-鏈枃妗ｅ湪浠ヤ笅鐪熸簮涓庝笂浣嶆枃妗ｇ害鏉熶笅锛岀粰鍑轰竴浠藉彲浠ョ洿鎺ユ墽琛屻€佺洿鎺ュ嬀閫夈€佺洿鎺ョ敤浜庤仈璋冩帹杩涚殑鍗忎綔涓庢帓鏈熸柟妗堬細
+本文档在以下真源与上位文档约束下，给出一份可以直接执行、直接勾选、直接用于联调推进的协作与排期方案：
 
 1. `docs/architecture-overview.md`
 2. `docs/development-guidelines.md`
@@ -12,461 +12,461 @@
 6. `docs/work-priority-plan.md`
 7. `docs/atomic-features.md`
 
-鏈枃妗ｉ噸鐐瑰洖绛斾互涓嬮棶棰橈細
+本文档重点回答以下问题：
 
-1. 褰撳墠椤圭洰宸茬粡鎺ㄨ繘鍒颁簡浠€涔堢▼搴︼紝鍝簺閾捐矾宸叉湁浠ｇ爜楠ㄦ灦锛屽摢浜涗粛鏈棴鐜€?
-2. P0銆丳1銆丳2銆丳3 鍚勯樁娈靛叿浣撹鍋氫粈涔堬紝鍝簺浠诲姟蹇呴』鍏堝畬鎴愩€?
-3. 浜斾釜浜哄垎鍒礋璐ｄ粈涔堟ā鍧椼€佷粈涔堟帴鍙ｃ€佷粈涔堥獙鏀剁粨鏋溿€?
-4. 姣忎釜浠诲姟瀹屾垚鍚庡浣曟墦鍕撅紝濡備綍鍒ゆ柇鏄惁鐪熸瀹屾垚銆?
-5. 濡備綍閬垮厤閲嶅寤鸿銆佽法杈圭晫瀹炵幇鍜屽厛鍋氬亣閾捐矾鍐嶈ˉ鐪熼摼璺€?
-
----
-
-## 2. 褰撳墠缁熶竴鍙ｅ緞
-
-### 2.1 涓婚摼璺彛寰?
-
-褰撳墠鍞竴涓婚摼璺繚鎸佷笉鍙橈細
-
-**璇煶 / 鎮仠杈撳叆 / 鏂囨湰閫変腑 / 鏂囦欢鎷栨嫿 / 閿欒淇℃伅 鈫?鎮诞鐞冭繎鍦烘壙鎺ワ紙鏂囦欢鎷栨嫿鍏堣繘鍏ラ檮浠堕槦鍒楋紝鐢ㄦ埛鎵嬪姩鍙戦€佸悗鍐嶅垱寤轰换鍔★級 鈫?鎰忓浘纭 鈫?鍒涘缓鎴栨洿鏂?`task` 鈫?Go local-service 缂栨帓 鈫?椋庨櫓璇勪及 / 鎺堟潈 / 瀹¤ / 鎭㈠鐐?鈫?`delivery_result / artifact` 姝ｅ紡浜や粯 鈫?浠〃鐩?/ 浠诲姟璇︽儏 / 瀹夊叏鎽樿灞曠ず 鈫?璁板繂鍛戒腑鎴栬蹇嗘憳瑕佸洖鍐欍€?*
-
-### 2.2 瀵瑰涓庡鍐呭璞″彛寰?
-
-- 瀵瑰缁熶竴鍥寸粫 `task`
-- 瀵瑰唴鎵ц鍏煎瀵硅薄淇濈暀 `run / step / event / tool_call`
-- 姝ｅ紡缁撴灉缁熶竴璧?`delivery_result / artifact / citation`
-- 鏃犱换鍔￠敋鐐圭殑绾ぞ浜?/ 闂茶亰杈撳叆涓嶅睘浜庢寮忔墽琛岃矾寰勶紝鍙彧杩斿洖鑴辩 `task` 鐨勮交閲忔皵娉★紱涓€鏃﹁緭鍏ラ渶瑕佹墽琛屻€佺‘璁ゃ€佹巿鏉冦€佷氦浠樻垨鎸佺画杩借釜锛屽繀椤诲洖鍒?`task` 涓婚摼璺€?
-- 楂橀闄╁姩浣滅粺涓€杩涘叆 `approval_request / authorization_record / audit_record / recovery_point`
-
-### 2.3 鍗忚涓庡伐绋嬪彛寰?
-
-- 鍓嶅悗绔敮涓€绋冲畾杈圭晫鏄?JSON-RPC 2.0
-- 姝ｅ紡鏂规硶缁熶竴浣跨敤 `agent.xxx.xxx`
-- 鑷敱杈撳叆鐨勬寮忔墽琛岃矾寰勪互 **Agent Loop / ReAct** 涓哄噯锛沗intent` 鍙礋璐ｅ叆鍙ｅ垽鏂€佹緞娓呫€佺‘璁や笌璁″垝楠ㄦ灦锛屼笉鏄紶缁?ChatBot 寮忓伐鍏峰垎绫诲櫒
-- 鐘舵€併€侀敊璇爜銆佽〃缁撴瀯鍒嗗埆浠ュ崗璁枃妗ｃ€佹暟鎹枃妗ｅ拰瀹炵幇鐪熸簮涓哄噯
-- 鍓嶇灞€閮ㄧ姸鎬佷笉鑳芥浛浠ｆ寮忎笟鍔＄姸鎬?
+1. 当前项目已经推进到了什么程度，哪些链路已有代码骨架，哪些仍未闭环。
+2. P0、P1、P2、P3 各阶段具体要做什么，哪些任务必须先完成。
+3. 五个人分别负责什么模块、什么接口、什么验收结果。
+4. 每个任务完成后如何打勾，如何判断是否真正完成。
+5. 如何避免重复建设、跨边界实现和先做假链路再补真链路。
 
 ---
 
-## 3. 缁撳悎褰撳墠浠撳簱浠ｇ爜鐨勮繘搴﹀垽鏂?
+## 2. 当前统一口径
 
-鍩轰簬褰撳墠浠撳簱浠ｇ爜锛岄」鐩苟涓嶆槸鈥滀粠闆跺紑濮嬧€濓紝鑰屾槸宸茬粡瀹屾垚浜嗚緝鏄庢樉鐨?P0 搴曞骇鍜岄儴鍒?P1 楠ㄦ灦锛屼絾涓婚摼璺粛鏈叏閮ㄨ仈璋冮棴鐜€?
+### 2.1 主链路口径
 
-### 3.1 宸叉湁杩涘睍
+当前唯一主链路保持不变：
 
-#### 鍗忚涓庡叡浜湡婧?
+**语音 / 悬停输入 / 文本选中 / 文件拖拽 / 错误信息 → 悬浮球近场承接（文件拖拽先进入附件队列，用户手动发送后再创建任务） → 意图确认 → 创建或更新 `task` → Go local-service 编排 → 风险评估 / 授权 / 审计 / 恢复点 → `delivery_result / artifact` 正式交付 → 仪表盘 / 任务详情 / 安全摘要展示 → 记忆命中或记忆摘要回写。**
 
-- [x] `packages/protocol/rpc/methods.ts` 宸插喕缁撳ぇ閮ㄥ垎 stable 鏂规硶甯搁噺涓庡弬鏁?缁撴灉绫诲瀷銆?
-- [x] `packages/protocol/errors/codes.ts`銆乣packages/protocol/schemas/*` 宸插叿澶囧崗璁湡婧愰洀褰€?
-- [x] `task.updated`銆乣delivery.ready`銆乣approval.pending` 绛夐€氱煡鏂规硶宸叉湁鍏变韩瀹氫箟銆?
+### 2.2 对外与对内对象口径
 
-#### 鍚庣涓婚摼璺鏋?
+- 对外统一围绕 `task`
+- 对内执行兼容对象保留 `run / step / event / tool_call`
+- 正式结果统一走 `delivery_result / artifact / citation`
+- 无任务锚点的纯社交 / 闲聊输入不属于正式执行路径，可只返回脱离 `task` 的轻量气泡；一旦输入需要执行、确认、授权、交付或持续追踪，必须回到 `task` 主链路。
+- 高风险动作统一进入 `approval_request / authorization_record / audit_record / recovery_point`
 
-- [x] `services/local-service/internal/rpc/handlers.go` 宸叉妸澶ч儴鍒?stable 鏂规硶璺敱鍒?orchestrator銆?
-- [x] `services/local-service/internal/orchestrator/service.go` 宸插疄鐜?`agent.input.submit`銆乣agent.task.start`銆乣agent.task.confirm`銆乣agent.task.list`銆乣agent.task.detail.get`銆乣agent.task.control`銆乣agent.task.artifact.list`銆乣agent.task.artifact.open`銆乣agent.delivery.open`銆佸贰妫€銆侀暅瀛愩€佸畨鍏ㄣ€佽缃瓑涓诲叆鍙ｃ€?
-- [x] `services/local-service/internal/runengine`銆乣internal/delivery`銆乣internal/context`銆乣internal/intent`銆乣internal/risk`銆乣internal/memory`銆乣internal/taskinspector` 宸插叿澶囨ā鍧楃骇浠ｇ爜楠ㄦ灦銆?
-- [x] 楂橀闄╂巿鏉冪瓑寰呫€佸緟鎵ц璁″垝鎸傝捣銆佸熀纭€ `delivery_result` 鏋勫缓宸茬粡杩涘叆涓荤紪鎺掋€?
+### 2.3 协议与工程口径
 
-#### 瀛樺偍涓庢不鐞嗗簳搴?
-
-- [x] `services/local-service/internal/storage/service.go` 宸叉帴鍏?SQLite WAL/in-memory 鍙岄€氳矾鍜?fallback 鏈哄埗銆?
-- [x] `sqlite_task_run_store.go`銆乣sqlite_memory_store.go`銆乣governance_store.go`銆乣artifact_store.go` 绛夎〃鏄庤繍琛屾€併€佽蹇嗐€佹不鐞嗕笌 artifact 鍐欏叆宸插紑濮嬭惤鍦般€?
-- [x] `internal/audit`銆乣internal/checkpoint`銆乣internal/risk` 宸叉湁鐙珛鏈嶅姟鍜屾祴璇曘€?
-
-#### 鍓嶇妗岄潰涓庤繎鍦哄叆鍙?
-
-- [x] `apps/desktop` 宸插舰鎴愬鍏ュ彛椤甸潰锛歚shell-ball.html`銆乣shell-ball-bubble.html`銆乣shell-ball-input.html`銆乣dashboard.html`銆乣control-panel.html`銆?
-- [x] `src/features/shell-ball/*` 宸插疄鐜版偓娴悆銆佹皵娉°€佽緭鍏ュ尯銆佸绐楀彛鍗忚皟鍣ㄣ€佽闊抽瑙堢瓑杩戝満浜や簰楠ㄦ灦銆?
-- [x] `src/platform/*` 宸插瓨鍦?Named Pipe bridge銆佺獥鍙ｆ帶鍒躲€佹墭鐩樻帶鍒躲€佹闈㈢獥鍙ｅ垏鎹㈢瓑骞冲彴鑳藉姏灏佽銆?
-
-#### 鍓嶇鏈嶅姟涓庤缃潰鏉?
-
-- [x] `src/rpc/client.ts`銆乣src/rpc/methods.ts`銆乣src/rpc/subscriptions.ts` 宸插紑濮嬪鎺ュ崗璁鎴风銆?
-- [x] `src/services/controlPanelService.ts`銆乣src/services/settingsService.ts`銆乣src/services/memoryService.ts`銆乣src/services/taskService.ts` 宸叉湁鍓嶇鏈嶅姟灞傞鏋躲€?
-- [x] `src/features/control-panel/ControlPanelApp.tsx` 宸茶惤鍦拌緝瀹屾暣鐨勬帶鍒堕潰鏉?UI銆?
-
-### 3.2 褰撳墠浠嶆湭鐪熸闂幆鐨勯儴鍒?
-
-- [ ] 鍓嶇杩戝満鍏ュ彛涓庣湡瀹?RPC 涓婚摼璺皻鏈叏閮ㄦ墦閫氾紝閮ㄥ垎鑳藉姏浠嶆槸鏈湴婕旂ず鎬佹垨鍗婅仈璋冩€併€?
-- [ ] 浠〃鐩樸€佷换鍔¤鎯呫€佸畨鍏ㄦ憳瑕併€侀暅瀛愭瑙堣櫧鐒舵湁妯″潡锛屼絾涓庡叏閮ㄧ湡瀹炲璞＄殑绋冲畾瀵规帴杩樻湭瀹屾垚銆?
-- [ ] `delivery_result / artifact / audit / recovery_point` 鐨勫畬鏁粹€滄墽琛屽悗鍙鍖栧洖娴佲€濊繕娌℃湁褰㈡垚绋冲畾绔埌绔綋楠屻€?
-- [ ] 宸℃杞换鍔°€佷换鍔¤鎯呭寮恒€佸畨鍏ㄥ崼澹鎯呫€侀暅瀛愬畬鏁村睍绀轰粛浠ラ鏋朵负涓伙紝灏氭湭褰㈡垚瀹屾暣 P1 姘村钩銆?
-- [ ] 澶氭ā鍨嬮厤缃垏鎹€佺ぞ鍖?Skills 瀹夎銆佹劅鐭ュ寘瑁呴厤鍜屾彃浠堕潤鎬佽祫浜ф不鐞嗕粛涓昏灞炰簬 P3 瑙勫垝鎬侊紱浣嗘彃浠惰繍琛屾€併€丱CR / Playwright / Media worker 涓庡睆骞?/ 椤甸潰鎰熺煡淇″彿搴曞骇宸茶繘鍏ュ彲鐢ㄩ樁娈点€?
-
-### 3.3 褰撳墠闃舵缁撹
-
-褰撳墠闃舵鍒ゆ柇涓猴細
-
-- **P0 搴曞骇宸叉湁杈冨ぇ姣斾緥钀藉湴**
-- **P0 涓婚摼璺棴鐜繕宸仈璋冨拰缁撴灉鎵挎帴鏀跺彛**
-- **P1 宸叉湁涓€鎵瑰簳搴ц兘鍔涜惤鍦帮紝浣嗕骇鍝佹壙鎺ャ€佽缃敹鍙ｄ笌姝ｅ紡鏌ヨ浠嶆湭闂幆**
-- **P2 / P3 浠嶄互杈圭晫棰勭暀涓轰富锛屼笉搴旀姠鍗犲綋鍓嶄富绾胯祫婧?*
-
-鍥犳锛屾帴涓嬫潵鎺掓湡蹇呴』浠?**鈥滆ˉ榻?P0 涓婚摼璺湡闂幆鈥?* 涓虹涓€鐩爣锛岃€屼笉鏄户缁墿鏁ｆ柊鍔熻兘闈€?
+- 前后端唯一稳定边界是 JSON-RPC 2.0
+- 正式方法统一使用 `agent.xxx.xxx`
+- 自由输入的正式执行路径以 **Agent Loop / ReAct** 为准；`intent` 只负责入口判断、澄清、确认与计划骨架，不是传统 ChatBot 式工具分类器
+- 状态、错误码、表结构分别以协议文档、数据文档和实现真源为准
+- 前端局部状态不能替代正式业务状态
 
 ---
 
-## 4. 浼樺厛绾у垝鍒嗗師鍒?
+## 3. 结合当前仓库代码的进度判断
+
+基于当前仓库代码，项目并不是“从零开始”，而是已经完成了较明显的 P0 底座和部分 P1 骨架，但主链路仍未全部联调闭环。
+
+### 3.1 已有进展
+
+#### 协议与共享真源
+
+- [x] `packages/protocol/rpc/methods.ts` 已冻结大部分 stable 方法常量与参数/结果类型。
+- [x] `packages/protocol/errors/codes.ts`、`packages/protocol/schemas/*` 已具备协议真源雏形。
+- [x] `task.updated`、`delivery.ready`、`approval.pending` 等通知方法已有共享定义。
+
+#### 后端主链路骨架
+
+- [x] `services/local-service/internal/rpc/handlers.go` 已把大部分 stable 方法路由到 orchestrator。
+- [x] `services/local-service/internal/orchestrator/service.go` 已实现 `agent.input.submit`、`agent.task.start`、`agent.task.confirm`、`agent.task.list`、`agent.task.detail.get`、`agent.task.control`、`agent.task.artifact.list`、`agent.task.artifact.open`、`agent.delivery.open`、巡检、镜子、安全、设置等主入口。
+- [x] `services/local-service/internal/runengine`、`internal/delivery`、`internal/context`、`internal/intent`、`internal/risk`、`internal/memory`、`internal/taskinspector` 已具备模块级代码骨架。
+- [x] 高风险授权等待、待执行计划挂起、基础 `delivery_result` 构建已经进入主编排。
+
+#### 存储与治理底座
+
+- [x] `services/local-service/internal/storage/service.go` 已接入 SQLite WAL/in-memory 双通路和 fallback 机制。
+- [x] `sqlite_task_run_store.go`、`sqlite_memory_store.go`、`governance_store.go`、`artifact_store.go` 等表明运行态、记忆、治理与 artifact 写入已开始落地。
+- [x] `internal/audit`、`internal/checkpoint`、`internal/risk` 已有独立服务和测试。
+
+#### 前端桌面与近场入口
+
+- [x] `apps/desktop` 已形成多入口页面：`shell-ball.html`、`shell-ball-bubble.html`、`shell-ball-input.html`、`dashboard.html`、`control-panel.html`。
+- [x] `src/features/shell-ball/*` 已实现悬浮球、气泡、输入区、多窗口协调器、语音预览等近场交互骨架。
+- [x] `src/platform/*` 已存在 Named Pipe bridge、窗口控制、托盘控制、桌面窗口切换等平台能力封装。
+
+#### 前端服务与设置面板
+
+- [x] `src/rpc/client.ts`、`src/rpc/methods.ts`、`src/rpc/subscriptions.ts` 已开始对接协议客户端。
+- [x] `src/services/controlPanelService.ts`、`src/services/settingsService.ts`、`src/services/memoryService.ts`、`src/services/taskService.ts` 已有前端服务层骨架。
+- [x] `src/features/control-panel/ControlPanelApp.tsx` 已落地较完整的控制面板 UI。
+
+### 3.2 当前仍未真正闭环的部分
+
+- [ ] 前端近场入口与真实 RPC 主链路尚未全部打通，部分能力仍是本地演示态或半联调态。
+- [ ] 仪表盘、任务详情、安全摘要、镜子概览虽然有模块，但与全部真实对象的稳定对接还未完成。
+- [ ] `delivery_result / artifact / audit / recovery_point` 的完整“执行后可视化回流”还没有形成稳定端到端体验。
+- [ ] 巡检转任务、任务详情增强、安全卫士详情、镜子完整展示仍以骨架为主，尚未形成完整 P1 水平。
+- [ ] 多模型配置切换、社区 Skills 安装、感知包装配和插件静态资产治理仍主要属于 P3 规划态；但插件运行态、OCR / Playwright / Media worker 与屏幕 / 页面感知信号底座已进入可用阶段。
+
+### 3.3 当前阶段结论
+
+当前阶段判断为：
+
+- **P0 底座已有较大比例落地**
+- **P0 主链路闭环还差联调和结果承接收口**
+- **P1 已有一批底座能力落地，但产品承接、设置收口与正式查询仍未闭环**
+- **P2 / P3 仍以边界预留为主，不应抢占当前主线资源**
+
+因此，接下来排期必须以 **“补齐 P0 主链路真闭环”** 为第一目标，而不是继续扩散新功能面。
+
+---
+
+## 4. 优先级划分原则
 
 ### 4.1 P0
 
-P0 涓嶆槸鈥滄渶灏戝姛鑳解€濓紝鑰屾槸 **蹇呴』鑳芥紨绀恒€佽兘鑱旇皟銆佽兘鎺堟潈銆佽兘浜や粯銆佽兘鎺掗殰** 鐨勪富閾捐矾鏈€浣庨棴鐜€?
+P0 不是“最少功能”，而是 **必须能演示、能联调、能授权、能交付、能排障** 的主链路最低闭环。
 
 ### 4.2 P1
 
-P1 璐熻矗鎶?P0 鐨勨€滆兘璺戔€濆彉鎴愨€滆兘鎸佺画浣跨敤鈥濓紝閲嶇偣鏄細
+P1 负责把 P0 的“能跑”变成“能持续使用”，重点是：
 
-- 宸℃瀹屾暣鍖?
-- 瀹夊叏涓庢仮澶嶅彲瑙佸寲
-- 闀滃瓙涓庨暱鏈熷崗浣滃彲瑙佸寲
-- Trace / Eval / 棰勭畻娌荤悊瀹屾暣鍖?
+- 巡检完整化
+- 安全与恢复可见化
+- 镜子与长期协作可见化
+- Trace / Eval / 预算治理完整化
 
 ### 4.3 P2
 
-P2 璐熻矗鎶婄郴缁熷仛寰楁洿鑷劧銆佹洿鏅鸿兘銆佹洿浣庢墦鎵帮紝鍓嶆彁鏄笉鐮村潖 P0/P1銆?
+P2 负责把系统做得更自然、更智能、更低打扰，前提是不破坏 P0/P1。
 
 ### 4.4 P3
 
-P3 璐熻矗鎵╁睍鐢熸€併€佽妯″寲銆佹彃浠跺寲銆佸妯″瀷鍖栥€侾3 缁濅笉鍏佽鍙嶅悜闃诲 P0 涓婚摼璺€?
+P3 负责扩展生态、规模化、插件化、多模型化。P3 绝不允许反向阻塞 P0 主链路。
 
 ---
 
-## 5. P0-P3 鎬讳换鍔″垪琛?
+## 5. P0-P3 总任务列表
 
-浠ヤ笅浠诲姟鍒楄〃浠モ€滃畬鎴愬悗鍗冲彲鍕鹃€夆€濅负鐩爣銆傛瘡涓换鍔￠粯璁ら渶瑕佹弧瓒筹細
+以下任务列表以“完成后即可勾选”为目标。每个任务默认需要满足：
 
-- 鏈夌湡瀹炰唬鐮佽惤鍦帮紝涓嶆槸鍙湁璁捐绋?
-- 鏈夌湡瀹炲璞″榻愶紝涓嶆槸鍙湁 UI 鍋囨暟鎹?
-- 鑳介€氳繃瀵瑰簲鑱旇皟璺緞楠岃瘉
-- 涓嶈繚鍙?`task-centric`銆丣SON-RPC銆佺粺涓€浜や粯鍑哄彛鍜屾不鐞嗛摼璺害鏉?
+- 有真实代码落地，不是只有设计稿
+- 有真实对象对齐，不是只有 UI 假数据
+- 能通过对应联调路径验证
+- 不违反 `task-centric`、JSON-RPC、统一交付出口和治理链路约束
 
-### 5.1 P0锛氫富閾捐矾涓庣粺涓€椤归棴鐜?
+### 5.1 P0：主链路与统一项闭环
 
-#### P0-A 缁熶竴椤瑰喕缁?
+#### P0-A 统一项冻结
 
-- [x] 鏍圭洰褰?`AGENTS.md`銆乣docs/architecture-overview.md`銆乣docs/development-guidelines.md`銆乣docs/protocol-design.md`銆乣docs/data-design.md`銆乣docs/module-design.md`銆乣docs/work-priority-plan.md` 瀵圭洰褰曡竟鐣屻€佸璞″悕鍜屾柟娉曞悕淇濇寔涓€鑷淬€?
-- [ ] `Task / TaskStep / Run / Step / Event / ToolCall / DeliveryResult / Artifact / Citation / ApprovalRequest / AuthorizationRecord / AuditRecord / RecoveryPoint` 杩欎簺鍏变韩瀵硅薄鍦?`packages/protocol`銆丟o runtime銆佸墠绔秷璐瑰眰涓夎竟瀛楁涓€鑷淬€?
-- [ ] `agent.input.submit / agent.task.start / agent.task.confirm / agent.task.list / agent.task.detail.get / agent.task.control / agent.delivery.open` 绛?stable 鏂规硶鐨勫弬鏁般€佽繑鍥炪€侀敊璇爜涓庢枃妗ｇ湡婧愪竴鑷淬€?
-- [ ] `Task.status`銆乣approval_request.status`銆乣bubble_message`銆乣delivery_result` 绛夊叡浜悎鍚屽璞★紝浠ュ強鍓嶇 route state 杩欑被鏈湴 UI 鐘舵€侊紝宸茬粡鍦ㄤ唬鐮佷腑瀹屾垚鍒嗗眰鏀舵竻锛屼笉鍐嶆柊澧炲钩琛屾ā鍨嬶紝涔熶笉鍐嶆妸璺敱鎬佽鍐欐垚闇€瑕?schema 瀵归綈鐨勬寮忓璞°€?
+- [x] 根目录 `AGENTS.md`、`docs/architecture-overview.md`、`docs/development-guidelines.md`、`docs/protocol-design.md`、`docs/data-design.md`、`docs/module-design.md`、`docs/work-priority-plan.md` 对目录边界、对象名和方法名保持一致。
+- [ ] `Task / TaskStep / Run / Step / Event / ToolCall / DeliveryResult / Artifact / Citation / ApprovalRequest / AuthorizationRecord / AuditRecord / RecoveryPoint` 这些共享对象在 `packages/protocol`、Go runtime、前端消费层三边字段一致。
+- [ ] `agent.input.submit / agent.task.start / agent.task.confirm / agent.task.list / agent.task.detail.get / agent.task.control / agent.delivery.open` 等 stable 方法的参数、返回、错误码与文档真源一致。
+- [ ] `Task.status`、`approval_request.status`、`bubble_message`、`delivery_result` 等共享合同对象，以及前端 route state 这类本地 UI 状态，已经在代码中完成分层收清，不再新增平行模型，也不再把路由态误写成需要 schema 对齐的正式对象。
 
-#### P0-B 鍓嶇杩戝満鍏ュ彛
+#### P0-B 前端近场入口
 
-- [ ] 鎮诞鐞冨父椹汇€佽创杈广€佹嫋鎷姐€佺獥鍙ｅ敜璧峰拰寰呮満鎬佸湪 `shell-ball` 涓荤獥鍙ｄ笂绋冲畾鍙敤銆?
-- [ ] 鍗曞嚮杞婚噺鎺ヨ繎鑳芥墦寮€鐪熷疄杞婚噺杈撳叆鎴栨帹鑽愬叆鍙ｏ紝涓嶅啀鍙仠鐣欏湪婕旂ず鎬佹皵娉°€?
-- [x] 鍙屽嚮鎵撳紑浠〃鐩樺苟鍔犺浇鐪熷疄棣栭〉鎬昏銆?
-- [x] 璇煶闀挎寜銆佷笂婊戦攣瀹氥€佷笅婊戝彇娑堛€佹澗寮€鎻愪氦鍦?`shell-ball-input` / `voice-preview` 鐘舵€佹満涓舰鎴愬畬鏁翠氦浜掗棴鐜€?
-- [x] 鎮仠杞婚噺杈撳叆鍙€氳繃鐪熷疄 RPC 鍙戣捣 `agent.input.submit`锛岃€屼笉鏄彧鍒锋柊鏈湴 mock 鐘舵€併€?
-- [x] 鏂囨湰閫変腑鎵挎帴宸茬粺涓€杩涘叆 `agent.task.start`锛涙枃浠舵嫋鎷芥壙鎺ュ厛杩涘叆闄勪欢闃熷垪锛屽苟鍦ㄧ敤鎴锋墜鍔ㄥ彂閫佸悗缁熶竴杩涘叆 `agent.task.start`銆?
-- [x] 閿欒淇℃伅鎵挎帴宸查€氳繃杩戝満缁熶竴 UI 鍔ㄤ綔杩涘叆姝ｅ紡鍏ュ彛銆?
-- [ ] 鎰忓浘纭姘旀场鑳芥壙鎺ョ‘璁ゅ姩浣滐紝骞舵敮鎸佺敤鎴烽€氳繃杞婚噺杈撳叆鍖哄鍚屼竴 `confirming_intent` 浠诲姟琛ュ厖鎴栦慨姝ｈ嚜鐒惰瑷€锛涙樉寮忔嫆缁濊矾寰勪粛寰呰ˉ榻愩€?
-- [x] 鐭粨鏋滃湪姘旀场涓洿鎺ユ壙鎺ワ紝闀跨粨鏋滈€氳繃 `delivery_result / artifact / open_action` 姝ｇ‘鍒嗘祦鍒颁换鍔¤鎯呫€佹枃妗ｆ垨鏂囦欢瀹氫綅鍔ㄤ綔銆?
+- [ ] 悬浮球常驻、贴边、拖拽、窗口唤起和待机态在 `shell-ball` 主窗口上稳定可用。
+- [ ] 单击轻量接近能打开真实轻量输入或推荐入口，不再只停留在演示态气泡。
+- [x] 双击打开仪表盘并加载真实首页总览。
+- [x] 语音长按、上滑锁定、下滑取消、松开提交在 `shell-ball-input` / `voice-preview` 状态机中形成完整交互闭环。
+- [x] 悬停轻量输入可通过真实 RPC 发起 `agent.input.submit`，而不是只刷新本地 mock 状态。
+- [x] 文本选中承接已统一进入 `agent.task.start`；文件拖拽承接先进入附件队列，并在用户手动发送后统一进入 `agent.task.start`。
+- [ ] 错误信息承接的服务层封装已存在，但近场入口还没有接入统一 UI 动作。
+- [ ] 意图确认气泡能承接 `agent.task.confirm` 的确认、修正、拒绝和补充说明。
+- [x] 短结果在气泡中直接承接，长结果通过 `delivery_result / artifact / open_action` 正确分流到任务详情、文档或文件定位动作。
 
-#### P0-C 涓婚摼璺兘鍔?
+#### P0-C 主链路能力
 
-- [ ] `summarize` 鑳戒粠杩戝満杈撳叆鎴栨枃鏈€変腑杩涘叆姝ｅ紡浠诲姟锛屽苟绋冲畾浜у嚭鐭粨鏋滄垨闀跨粨鏋溿€?
-- [ ] `translate` 鑳戒粠杩戝満杈撳叆杩涘叆浠诲姟锛岃繑鍥炵煭缁撴灉鎴栨寮忎氦浠樸€?
-- [ ] `explain` 鑳芥妸閫変腑鏂囨湰鎴栭敊璇枃鏈浆鎴愯В閲婄粨鏋滐紝骞跺湪姘旀场鎴栦换鍔¤鎯呬腑绋冲畾鎵挎帴銆?
-- [ ] `analyze_error` 鑳芥妸閿欒淇℃伅銆佹棩蹇楃墖娈点€侀〉闈㈤敊璇枃鏈浆鎴愬師鍥犲垎鏋愬拰寤鸿銆?
-- [ ] `suggest_next_step` 鑳界敓鎴愪笅涓€姝ュ姩浣滃缓璁紝骞跺湪浠诲姟璇︽儏鎴栨皵娉′腑姝ｇ‘鎵挎帴銆?
-- [ ] `draft` / `write_file` 鑳芥妸闀跨粨鏋滃垎娴佸埌 workspace document銆乤rtifact 鎴栦换鍔¤鎯呫€?
+- [ ] `summarize` 能从近场输入或文本选中进入正式任务，并稳定产出短结果或长结果。
+- [ ] `translate` 能从近场输入进入任务，返回短结果或正式交付。
+- [ ] `explain` 能把选中文本或错误文本转成解释结果，并在气泡或任务详情中稳定承接。
+- [ ] `analyze_error` 能把错误信息、日志片段、页面错误文本转成原因分析和建议。
+- [ ] `suggest_next_step` 能生成下一步动作建议，并在任务详情或气泡中正确承接。
+- [ ] `draft` / `write_file` 能把长结果分流到 workspace document、artifact 或任务详情。
 
-#### P0-D 鍚庣涓荤紪鎺掍笌浜や粯
+#### P0-D 后端主编排与交付
 
-- [x] `agent.input.submit`銆乣agent.task.start`銆乣agent.task.confirm` 绔埌绔仈璋冮€氳繃銆?
-- [x] `agent.task.list`銆乣agent.task.detail.get`銆乣agent.task.control` 绔埌绔仈璋冮€氳繃銆?
-- [x] `task_id` 涓?`run_id` 鐨勭ǔ瀹氭槧灏勫湪涓婚摼璺€佹煡璇㈤摼璺拰浜や粯閾捐矾涓竴鑷淬€?
-- [x] `delivery_result` 鏈€灏忛棴鐜彲鐪熷疄鐢熸垚骞跺洖娴佸墠绔€?
-- [x] 鑷冲皯涓€绉?`artifact` 绫诲瀷鍙湡瀹炶惤鐩樺苟鍦ㄥ墠绔鎵撳紑鎴栧畾浣嶃€傦紙褰撳墠 `workspace_document / open_file / reveal_in_folder / task_detail` 宸查€氳繃鍚庣浜や粯閾句笌鍓嶇 `taskOutput.service.ts` 鏀跺彛锛?
-- [x] 鑷冲皯涓€鏉℃墽琛岄摼鍙粡杩囧伐鍏疯皟鐢ㄥ苟鎶婄粨鏋滃洖娴佸埌 `tool_call / event / delivery_result` 閾俱€?
+- [x] `agent.input.submit`、`agent.task.start`、`agent.task.confirm` 端到端联调通过。
+- [x] `agent.task.list`、`agent.task.detail.get`、`agent.task.control` 端到端联调通过。
+- [x] `task_id` 与 `run_id` 的稳定映射在主链路、查询链路和交付链路中一致。
+- [x] `delivery_result` 最小闭环可真实生成并回流前端。
+- [x] 至少一种 `artifact` 类型可真实落盘并在前端被打开或定位。（当前 `workspace_document / open_file / reveal_in_folder / task_detail` 已通过后端交付链与前端 `taskOutput.service.ts` 收口）
+- [x] 至少一条执行链可经过工具调用并把结果回流到 `tool_call / event / delivery_result` 链。
 
-#### P0-E 椋庨櫓娌荤悊鏈€灏忛棴鐜?
+#### P0-E 风险治理最小闭环
 
-- [x] 椋庨櫓鍒嗙骇鑳藉尯鍒?`green / yellow / red`銆?
-- [x] 鑷冲皯涓€鏉￠珮椋庨櫓鍔ㄤ綔鑳藉垱寤?`approval_request` 骞惰繘鍏ョ瓑寰呮巿鏉冩€併€?
-- [x] 鐢ㄦ埛鍏佽 / 鎷掔粷鑳界湡瀹炵敓鎴?`authorization_record`銆?
-- [x] 楂橀闄╁姩浣滃墠鑳藉垱寤?`recovery_point`銆?
-- [x] 鎵ц瀹屾垚鍚庤兘鐢熸垚 `audit_record`銆?
-- [x] 鍓嶇鑳界湅鍒板緟鎺堟潈鎽樿涓庢渶杩戞仮澶嶇偣鎽樿銆?
+- [x] 风险分级能区分 `green / yellow / red`。
+- [x] 至少一条高风险动作能创建 `approval_request` 并进入等待授权态。
+- [x] 用户允许 / 拒绝能真实生成 `authorization_record`。
+- [x] 高风险动作前能创建 `recovery_point`。
+- [x] 执行完成后能生成 `audit_record`。
+- [x] 前端能看到待授权摘要与最近恢复点摘要。
 
-#### P0-F 鏁版嵁涓庡簳搴?
+#### P0-F 数据与底座
 
-- [x] SQLite + WAL 缁撴瀯鍖栬繍琛屾€佸彲鐢ㄣ€?
-- [x] `tasks / runs / task_steps / events / tool_calls / delivery_results / artifacts / approval_requests / authorization_records / audit_records / recovery_points` 鑷冲皯瀹屾垚鏈€灏忓彲鐢ㄨ鍐欍€?
-- [x] FTS5 + sqlite-vec 楠ㄦ灦鍙垵濮嬪寲锛岃蹇嗗眰涓嶄笌杩愯鎬佹贩鍐欍€?
-- [x] Workspace / Artifact 鏈€灏忚惤鐩樿矾寰勬墦閫氥€?
-- [x] Stronghold secret store 鏈€灏忛棴鐜墦閫氾紝妯″瀷瀵嗛挜涓庢晱鎰熼厤缃凡鑴辩鏅€氳缃矾寰勩€?
-- [x] OpenAI Responses API 鎺ュ叆鍦ㄤ富閾捐矾鍙湡瀹炰娇鐢ㄣ€傦紙褰撳墠浠嶄互 `openai_responses` 鍗?provider 涓轰富锛屽悗缁?provider 鎵╁睍涓庤矾鐢辨不鐞嗙暀鍦ㄥ悗缁樁娈碉級
-- [x] 鏂囦欢璇诲啓 / 鍛戒护鎵ц / 缃戦〉璇诲彇宸ュ叿宸茶缁熶竴鏀跺彛骞舵湁閿欒鏄犲皠銆?
-- [x] `sessions` 涓€绛夊瓨鍌ㄤ笌鏈€灏忔煡璇㈣閰嶅彲鐢紝`session -> task -> run` 涓嶅啀鍙潬 runtime / `task_runs` 鍏煎璺緞銆?
-- [x] 鏅€?settings 蹇収杩涘叆缁撴瀯鍖栨寔涔呭寲锛宍general / floating_ball / memory / task_automation / models` 鍙湪閲嶅惎鍚庡洖濉€?
-- [x] `agent.settings.get / agent.settings.update` 鍚庣姝ｅ紡鏀跺彛鍒?`models / models.credentials`锛屼笉鍐嶉暱鏈熶緷璧?`data_log` 鍏煎缁撴瀯銆?
+- [x] SQLite + WAL 结构化运行态可用。
+- [x] `tasks / runs / task_steps / events / tool_calls / delivery_results / artifacts / approval_requests / authorization_records / audit_records / recovery_points` 至少完成最小可用读写。
+- [x] FTS5 + sqlite-vec 骨架可初始化，记忆层不与运行态混写。
+- [x] Workspace / Artifact 最小落盘路径打通。
+- [x] Stronghold secret store 最小闭环打通，模型密钥与敏感配置已脱离普通设置路径。
+- [x] OpenAI Responses API 接入在主链路可真实使用。（当前仍以 `openai_responses` 单 provider 为主，后续 provider 扩展与路由治理留在后续阶段）
+- [x] 文件读写 / 命令执行 / 网页读取工具已被统一收口并有错误映射。
+- [x] `sessions` 一等存储与最小查询装配可用，`session -> task -> run` 不再只靠 runtime / `task_runs` 兼容路径。
+- [x] 普通 settings 快照进入结构化持久化，`general / floating_ball / memory / task_automation / models` 可在重启后回填。
+- [x] `agent.settings.get / agent.settings.update` 后端正式收口到 `models / models.credentials`，不再长期依赖 `data_log` 兼容结构。
 
-#### P0-G 宸ヤ綔鍙版渶灏忛棴鐜?
+#### P0-G 工作台最小闭环
 
-- [x] 浠〃鐩橀椤佃兘灞曠ず褰撳墠鐒︾偣浠诲姟涓庢渶灏忎俊浠绘憳瑕併€?
-- [x] 浠诲姟鐘舵€佹ā鍧楄兘灞曠ず鏈畬鎴?/ 宸插畬鎴愪换鍔°€?
-- [x] 浠诲姟璇︽儏鏈€灏忕増鑳藉睍绀轰换鍔″ご閮ㄣ€佹椂闂寸嚎銆佹垚鏋滃尯銆?
-- [x] 瀹夊叏鍗＋鎽樿鏈€灏忕増鑳藉睍绀洪闄╃姸鎬併€佸緟鎺堟潈鏁般€佹渶杩戞仮澶嶇偣銆?
-- [x] 闀滃瓙姒傝鏈€灏忕増鑳藉睍绀鸿嚦灏戜竴鏉″巻鍙叉憳瑕佹垨璁板繂鍛戒腑銆?
-- [x] 鎺у埗闈㈡澘鏈€灏忚缃兘璇诲彇骞朵繚瀛樼湡瀹炶缃揩鐓с€傦紙鎺у埗闈㈡澘宸查€氳繃鐪熷疄 JSON-RPC 璇诲彇銆佷繚瀛樺苟鍥炴樉 `general / floating_ball / memory / models` 姝ｅ紡璁剧疆蹇収锛涚湡瀹炰繚瀛橀摼璺凡鏈夋闈?contract test 瑕嗙洊銆傦級
+- [x] 仪表盘首页能展示当前焦点任务与最小信任摘要。
+- [x] 任务状态模块能展示未完成 / 已完成任务。
+- [x] 任务详情最小版能展示任务头部、时间线、成果区。
+- [x] 安全卫士摘要最小版能展示风险状态、待授权数、最近恢复点。
+- [x] 镜子概览最小版能展示至少一条历史摘要或记忆命中。
+- [x] 控制面板最小设置能读取并保存真实设置快照。（控制面板已通过真实 JSON-RPC 读取、保存并回显 `general / floating_ball / memory / models` 正式设置快照；真实保存链路已有桌面 contract test 覆盖。）
 
-#### P0-H 宸℃鏈€灏忛棴鐜?
+#### P0-H 巡检最小闭环
 
-- [x] 浠诲姟婧愭帴鍏ュ彲閰嶇疆銆?
-- [ ] 浠诲姟鏂囦欢鐩戝惉鍙Е鍙戝贰妫€銆?
-- [x] Markdown 浠诲姟缁撴瀯璇嗗埆鏈€灏忓彲鐢ㄣ€?
-- [x] 浠诲姟鐘舵€佸垽鏂渶灏忓彲鐢ㄣ€?
-- [x] `agent.notepad.convert_to_task` 鑳芥妸浜嬮」鍗囩骇涓烘寮忎换鍔°€?
+- [x] 任务源接入可配置。
+- [ ] 任务文件监听可触发巡检。
+- [x] Markdown 任务结构识别最小可用。
+- [x] 任务状态判断最小可用。
+- [x] `agent.notepad.convert_to_task` 能把事项升级为正式任务。
 
-#### P0-I 鑱旇皟楠屾敹
+#### P0-I 联调验收
 
-- [ ] 鏂囨湰閫変腑鍏ュ彛鑷冲皯瀹屾暣璺戦€氫竴娆★細`TextPattern / 鐪熷疄閫夊尯鎵挎帴 -> agent.task.start -> 锛堟寜闇€杩涘叆 agent.task.confirm锛?> bubble result / task detail / delivery_result`銆?
-- [ ] 鏂囦欢鎷栨嫿鍏ュ彛鑷冲皯瀹屾暣璺戦€氫竴娆★細`闄勪欢闃熷垪鍏ュ垪 -> 鐢ㄦ埛琛ュ厖璇存槑 -> 鎵嬪姩鍙戦€?-> agent.task.start -> artifact / delivery_result`銆?
-- [ ] 璇煶鍏ュ彛鑷冲皯瀹屾暣璺戦€氫竴娆★細`闀挎寜褰曢煶 -> 褰曢煶瀹屾垚涓诲姩鎻愪氦 -> agent.input.submit -> task 杩涘叆涓婚摼璺痐銆?
-- [ ] 鑷冲皯涓€鏉￠珮椋庨櫓鍔ㄤ綔閾捐矾瀹屾暣璺戦€氾細`approval_request -> authorization_record -> audit_record -> recovery_point -> 鏈€缁堢粨鏋滄壙鎺銆?
-- [x] 鑷冲皯涓€鏉￠暱缁撴灉鑷姩鍒嗘祦鍒版枃妗ｆ垨鏂囦欢锛歚delivery_result / artifact / open_action` 鍦ㄥ墠鍚庣瀹屾暣鎵挎帴銆?
-- [x] 鑷冲皯涓€娆¤蹇嗗懡涓垨璁板繂鎽樿鍐欏叆鍙鍓嶇鐪嬪埌銆?
+- [ ] 文本选中入口至少完整跑通一次：`TextPattern / 真实选区承接 -> agent.task.start -> （按需进入 agent.task.confirm）-> bubble result / task detail / delivery_result`。
+- [ ] 文件拖拽入口至少完整跑通一次：`附件队列入列 -> 用户补充说明 -> 手动发送 -> agent.task.start -> artifact / delivery_result`。
+- [ ] 语音入口至少完整跑通一次：`长按录音 -> 录音完成主动提交 -> agent.input.submit -> task 进入主链路`。
+- [ ] 至少一条高风险动作链路完整跑通：`approval_request -> authorization_record -> audit_record -> recovery_point -> 最终结果承接`。
+- [x] 至少一条长结果自动分流到文档或文件：`delivery_result / artifact / open_action` 在前后端完整承接。
+- [x] 至少一次记忆命中或记忆摘要写入可被前端看到。
 
-### 5.2 P1锛氬彲鎸佺画浣跨敤涓庢不鐞嗗寮?
+### 5.2 P1：可持续使用与治理增强
 
-#### P1-A 宸℃涓庡緟鍔炲寮?
+#### P1-A 巡检与待办增强
 
-- [ ] 涓诲姩鎻愰啋瀵硅薄鑳藉湪浠诲姟宸℃椤垫垨杩戝満鎻愮ず涓湅鍒帮紝骞惰兘璺冲洖鐩爣浠诲姟銆?
-- [ ] 姣忔棩浠诲姟鎽樿鍙湪浠〃鐩樻垨宸℃妯″潡涓煡鐪嬶紝涓嶅啀鍙仠鐣欏湪鍚庣鑱氬悎缁撴灉銆?
-- [ ] 浼樺厛绾у缓璁彲鍦ㄥ贰妫€妯″潡涓煡鐪嬶紝骞惰兘鍥為摼鍒板搴斾换鍔°€?
-- [ ] 涓嬩竴姝ュ姩浣滃缓璁兘甯︿笂鈥滄墦寮€鐩稿叧璧勬枡 / 鎵撳紑浠诲姟璇︽儏 / 鎵撳紑缁撴灉鏂囨。鈥濈瓑鍏蜂綋鎵挎帴鍔ㄤ綔銆?
-- [ ] 宸℃鑽夌鐢熸垚鑳藉姏鍙舰鎴愭寮?`delivery_result / artifact`锛岃€屼笉鏄彧鍋滅暀鍦ㄦ枃鏈缓璁€?
-- [ ] 浠诲姟宸℃妯″潡鍦ㄤ华琛ㄧ洏涓彲鐪熷疄浣跨敤锛屽苟鑳藉埛鏂颁换鍔℃簮銆佹憳瑕佸拰寤鸿缁撴灉銆?
+- [ ] 主动提醒对象能在任务巡检页或近场提示中看到，并能跳回目标任务。
+- [ ] 每日任务摘要可在仪表盘或巡检模块中查看，不再只停留在后端聚合结果。
+- [ ] 优先级建议可在巡检模块中查看，并能回链到对应任务。
+- [ ] 下一步动作建议能带上“打开相关资料 / 打开任务详情 / 打开结果文档”等具体承接动作。
+- [ ] 巡检草稿生成能力可形成正式 `delivery_result / artifact`，而不是只停留在文本建议。
+- [ ] 任务巡检模块在仪表盘中可真实使用，并能刷新任务源、摘要和建议结果。
 
-#### P1-B 浠诲姟涓庣粨鏋滃寮?
+#### P1-B 任务与结果增强
 
-- [ ] 浠诲姟璇︽儏澧炲己锛岃ˉ榻愭椂闂寸嚎銆佹垚鏋滃尯銆佸叧閿笂涓嬫枃銆佸畨鍏ㄦ憳瑕併€乣loop_stop_reason`銆乺untime event 瑙嗗浘銆?
-- [ ] 缁撴灉椤?/ 娴忚鍣ㄤ氦浠樺舰鎴愮湡瀹炴壙鎺ワ紝鑷冲皯瑕嗙洊椤甸潰鎽樿銆侀〉闈㈣В閲娿€侀〉闈㈡悳绱㈢瓑鍦烘櫙銆?
-- [x] 鏂囦欢浜や粯銆佹墦寮€鏂囦欢銆佸畾浣嶇洰褰曘€亀orkspace document 鎵撳紑鍔ㄤ綔褰㈡垚绋冲畾浣撻獙锛堝悗绔?`agent.task.artifact.open` / `agent.delivery.open` 宸茬粺涓€锛宒ashboard / notes / shell-ball 宸插叡浜寮?open flow 涓庢湰鍦版墦寮€鍔ㄤ綔锛夈€?
-- [ ] 杩炵画浠诲姟銆佸け璐ヤ换鍔°€佺瓑寰呮巿鏉冧换鍔¤兘姝ｇ‘鍒嗘祦鍒颁换鍔¤鎯咃紝鑰屼笉鏄彧鍋滅暀鍦ㄦ皵娉℃€併€?
+- [ ] 任务详情增强，补齐时间线、成果区、关键上下文、安全摘要、`loop_stop_reason`、runtime event 视图。
+- [ ] 结果页 / 浏览器交付形成真实承接，至少覆盖页面摘要、页面解释、页面搜索等场景。
+- [x] 文件交付、打开文件、定位目录、workspace document 打开动作形成稳定体验（后端 `agent.task.artifact.open` / `agent.delivery.open` 已统一，dashboard / notes / shell-ball 已共享正式 open flow 与本地打开动作）。
+- [ ] 连续任务、失败任务、等待授权任务能正确分流到任务详情，而不是只停留在气泡态。
 
-#### P1-C 瀹夊叏涓庢仮澶嶅寮?
+#### P1-C 安全与恢复增强
 
-- [x] 鎭㈠涓庡洖婊氭煡鐪嬮〉鍙敤銆?
-- [x] Token / 璐圭敤鎬昏鍙煡鐪嬨€?
-- [x] 棰勭畻闄嶇骇绛栫暐杩涘叆鐪熷疄鎵ц锛屼笉鍙槸鏂囨鎻愮ず銆?
-- [x] 宸ヤ綔鍖鸿竟鐣屻€佸懡浠ょ櫧鍚嶅崟銆佸奖鍝嶈寖鍥村睍绀烘洿瀹屾暣锛涢珮椋庨櫓鍛戒护浼樺厛缁?Docker sandbox 鍙楁帶鎵ц锛學indows shell 鍛戒护淇濈暀鍙楁帶瀹夸富璺緞銆?
+- [x] 恢复与回滚查看页可用。
+- [x] Token / 费用总览可查看。
+- [x] 预算降级策略进入真实执行，不只是文案提示。
+- [x] 工作区边界、命令白名单、影响范围展示更完整；高风险命令优先经 Docker sandbox 受控执行，Windows shell 命令保留受控宿主路径。
 
-#### P1-D 璁板繂銆乀race 涓庡鏌ュ寮?
+#### P1-D 记忆、Trace 与审查增强
 
-- [x] 闀滃瓙鏃ユ姤銆佸巻鍙叉瑕併€佺敤鎴风敾鍍忓熀纭€灞曠ず鍙敤銆?
-- [x] Trace / Eval 瀹屾暣鍖栵紝宸茶惤鐩?`trace_records / eval_snapshots` 骞惰褰曡緭鍏?杈撳嚭鎽樿銆乴oop round銆乼ool 璋冪敤銆乴atency銆乧ost 涓?review 缁撴灉銆?
-- [x] Doom Loop 妫€娴嬪彲璁板綍骞惰兘褰卞搷涓婚摼璺紝宸叉敮鎸侀噸澶嶈皟鐢ㄧ鍚?/ 閲嶅鏃犺繘灞曢敊璇懡涓苟瑙﹀彂 blocked 鎵挎帴銆?
-- [x] Human-in-the-loop 鍗囩骇鍙舰鎴愮粨鏋勫寲瀵硅薄鎴栫姸鎬佺粨鏋滐紝宸茬敓鎴?escalation payload 骞舵妸浠诲姟鎺ㄨ繘鍒板彲鎭㈠鐨?blocked / pending execution 鐘舵€併€?
+- [x] 镜子日报、历史概要、用户画像基础展示可用。
+- [x] Trace / Eval 完整化，已落盘 `trace_records / eval_snapshots` 并记录输入/输出摘要、loop round、tool 调用、latency、cost 与 review 结果。
+- [x] Doom Loop 检测可记录并能影响主链路，已支持重复调用签名 / 重复无进展错误命中并触发 blocked 承接。
+- [x] Human-in-the-loop 升级可形成结构化对象或状态结果，已生成 escalation payload 并把任务推进到可恢复的 blocked / pending execution 状态。
 
-#### P1-E 鑳藉姏搴曞骇澧炲己
+#### P1-E 能力底座增强
 
-- [x] OCR worker 鐪熸帴鍏ワ紝宸叉敮鎸?`extract_text / ocr_image / ocr_pdf` 涓庣粺涓€閿欒鏄犲皠銆?
-- [x] Playwright 瀹屾暣鎺ュ叆锛屽凡鏀寔 `page_read / page_search / page_interact / structured_dom` 涓庡仴搴锋鏌ュ洖鏀讹紱3b 宸茶ˉ榻愭墽琛屽眰 attach hint 娉ㄥ叆銆乤ttach-only snapshot 缁窇淇濈暀鍜屾棦鏈?`browser_*` intent 鐨勪富閾捐矾鍥炲綊淇锛屼絾杩涚▼绾?session narrowing 浠嶅緟鍚庣画鎵╁睍 attach contract 涓?worker 鐩爣閫夋嫨閫昏緫銆?
-- [x] Media worker 鐪熸帴鍏ワ紝宸叉敮鎸?`transcode_media / normalize_recording / extract_frames`銆?
-- [x] worker 缁撴灉宸插洖鍐?`tool_call.completed` 浜嬩欢閫氱煡锛屽苟鎼哄甫 `source / path / url / output_path` 绛夊叧閿厓淇℃伅銆?
-- [x] Stronghold 姝ｅ紡鎺ュ叆銆?
-- [x] 鎻掍欢杩愯鎬佹煡鐪嬫墦閫氫华琛ㄧ洏銆?
-- [x] 灞忓箷鎰熺煡 session / temp / clip 娌荤悊琛ラ綈锛氳繃鏈?session 鎵弿銆佹樉寮?stop/expire cleanup銆乧lip 褰曞睆鐗囨褰掍竴鍖栦笌 `media_worker` 杈圭晫鏀跺彛銆乷rphaned temp 鍥炴敹鍧囧凡钀藉湴銆?
+- [x] OCR worker 真接入，已支持 `extract_text / ocr_image / ocr_pdf` 与统一错误映射。
+- [x] Playwright 完整接入，已支持 `page_read / page_search / page_interact / structured_dom` 与健康检查回收；3b 已补齐执行层 attach hint 注入、attach-only snapshot 续跑保留和既有 `browser_*` intent 的主链路回归修复，但进程级 session narrowing 仍待后续扩展 attach contract 与 worker 目标选择逻辑。
+- [x] Media worker 真接入，已支持 `transcode_media / normalize_recording / extract_frames`。
+- [x] worker 结果已回写 `tool_call.completed` 事件通知，并携带 `source / path / url / output_path` 等关键元信息。
+- [x] Stronghold 正式接入。
+- [x] 插件运行态查看打通仪表盘。
+- [x] 屏幕感知 session / temp / clip 治理补齐：过期 session 扫描、显式 stop/expire cleanup、clip 录屏片段归一化与 `media_worker` 边界收口、orphaned temp 回收均已落地。
 
-### 5.3 P2锛氫綋楠屼笌鏅鸿兘澧炲己
+### 5.3 P2：体验与智能增强
 
-- [ ] 涓诲姩鎺ㄨ崘瑙﹀彂瑙勫垯澧炲己锛岃ˉ榻愬喎鍗淬€佸満鏅笌闈欓粯瑙勫垯銆?
-- [x] 琛屼负涓庢満浼氳瘑鍒寮猴紝宸叉敮鎸佸熀浜庡鍒躲€佸仠鐣欍€佸垏鎹€侀敊璇拰椤甸潰涓婁笅鏂囩敓鎴愭洿绋冲畾鐨勬満浼氬€欓€夈€?
-- [x] 澶嶅埗琛屼负鎰熺煡鎺ュ叆鎺ㄨ崘閾捐矾锛屽凡鏀寔 clipboard / copy_count / last_action 瑙﹀彂杞婚噺鎺ㄨ崘銆?
-- [x] 灞忓箷 / 椤甸潰 /绯荤粺鎰熺煡杩涗竴姝ュ寮猴紝宸茶ˉ榻?page/window/visible_text/screen_summary/dwell/switch 绛夊悗绔俊鍙锋壙鎺ャ€?
-- [ ] 鏇寸粏鑵荤殑姘旀场鍔ㄧ敾銆佽交鎻愮ず鍜屽急鎵撴壈浣撻獙瀹屾垚銆?
-- [ ] 棣栭〉鎰忚瘑鍦哄己鍖栵紝鐪熸褰㈡垚鈥滃綋鍓嶆渶鍊煎緱鍏虫敞鐨勪簨鈥濄€?
-- [ ] 瑙嗛鎬荤粨鑳藉姏鎵撻€氥€?
-- [ ] 閲嶅浠诲姟妯℃澘鍖栧彲鐢ㄣ€?
-- [ ] 闀滃瓙鎬荤粨瀹屾暣鍖栥€?
-- [ ] 鐢ㄦ埛鐢诲儚绠＄悊鍙紪杈戙€佺籂姝ｃ€佸垹闄ゃ€?
+- [ ] 主动推荐触发规则增强，补齐冷却、场景与静默规则。
+- [x] 行为与机会识别增强，已支持基于复制、停留、切换、错误和页面上下文生成更稳定的机会候选。
+- [x] 复制行为感知接入推荐链路，已支持 clipboard / copy_count / last_action 触发轻量推荐。
+- [x] 屏幕 / 页面 /系统感知进一步增强，已补齐 page/window/visible_text/screen_summary/dwell/switch 等后端信号承接。
+- [ ] 更细腻的气泡动画、轻提示和弱打扰体验完成。
+- [ ] 首页意识场强化，真正形成“当前最值得关注的事”。
+- [ ] 视频总结能力打通。
+- [ ] 重复任务模板化可用。
+- [ ] 镜子总结完整化。
+- [ ] 用户画像管理可编辑、纠正、删除。
 
-### 5.4 P3锛氱敓鎬佷笌瑙勬ā鍖栨墿灞?
+### 5.4 P3：生态与规模化扩展
 
-- [ ] 澶氱敓鎬佹彃浠跺彲瀹夎銆佸惎鍋溿€佹煡鐪嬬増鏈笌鏉冮檺銆?
-- [ ] 澶氭ā鍨嬮厤缃彲鍒囨崲鎻愪緵鍟嗐€佹ā鍨?ID 鍜岃矾鐢辩瓥鐣ャ€?
-- [ ] 绀惧尯 Skills 鍏煎鍙帴鍏?GitHub 鏉ユ簮骞惰褰曟潵婧愩€佺増鏈€佹潈闄愩€?
-- [ ] 鎰熺煡鍖呮墿灞曟満鍒跺彲鐢ㄣ€?
-- [ ] 鎻掍欢甯傚満 / 鑳藉姏鍖呯鐞嗗舰鎴愬熀纭€浜у搧褰㈡€併€?
-- [ ] 浜戠鍙€夊悓姝ヨ兘鍔涜璁′笌瀹炵幇銆?
-- [ ] 澶氳澶囧崗鍚岃兘鍔涜璁′笌瀹炵幇銆?
-- [ ] 鍥㈤槦閰嶇疆鍚屾鑳藉姏璁捐涓庡疄鐜般€?
+- [ ] 多生态插件可安装、启停、查看版本与权限。
+- [ ] 多模型配置可切换提供商、模型 ID 和路由策略。
+- [ ] 社区 Skills 兼容可接入 GitHub 来源并记录来源、版本、权限。
+- [ ] 感知包扩展机制可用。
+- [ ] 插件市场 / 能力包管理形成基础产品形态。
+- [ ] 云端可选同步能力设计与实现。
+- [ ] 多设备协同能力设计与实现。
+- [ ] 团队配置同步能力设计与实现。
 
 ---
 
-## 6. 浜斾釜浜虹殑鍏蜂綋鍒嗗伐瀹夋帓
+## 6. 五个人的具体分工安排
 
-浠ヤ笅鍒嗗伐涓嶆槸鈥滆皝閮借兘椤烘墜鏀光€濓紝鑰屾槸涓昏矗鍒掑垎銆傚厑璁稿崗浣滐紝浣嗗繀椤绘槑纭富璐ｄ汉銆佷緷璧栧叧绯诲拰楠屾敹杈圭晫銆?
+以下分工不是“谁都能顺手改”，而是主责划分。允许协作，但必须明确主责人、依赖关系和验收边界。
 
-### 6.1 1鍙凤細鍓嶇杩戝満浜や簰涓庤〃鐜板眰涓昏矗
+### 6.1 1号：前端近场交互与表现层主责
 
-#### 涓昏矗妯″潡
+#### 主责模块
 
-- 鎮诞鐞冧富瑙嗗浘
-- 姘旀场涓庤交鎵挎帴瑙嗗浘
-- 杞婚噺杈撳叆鍖?
-- 璇煶鎵挎帴 UI
-- 杩戝満寮傚父鎻愮ず涓庣煭鍙嶉
+- 悬浮球主视图
+- 气泡与轻承接视图
+- 轻量输入区
+- 语音承接 UI
+- 近场异常提示与短反馈
 
-#### 褰撳墠浠ｇ爜涓庡墿浣欎换鍔￠噸鏁?
+#### 当前代码与剩余任务重整
 
-##### 褰撳墠浠ｇ爜宸插畬鎴愮殑鍩虹椤?
+##### 当前代码已完成的基础项
 
-- [x] 鎮诞鐞冭闊虫壙鎺ラ摼宸茬粡鍏峰瀹屾暣鐨勬墜鍔块棴鐜細闀挎寜杩涘叆鏀堕煶銆佷笂婊戦攣瀹氥€佷笅婊戝彇娑堛€佹澗寮€鎻愪氦锛屼互鍙婂綍闊虫椂鐨?helper 鎻愮ず涓庤緭鍏ヨ緟绐楄仈鍔ㄣ€?
-- [x] 杩戝満姝ｅ紡鍙戣捣閾惧凡缁忚鐩栨偓鍋滆緭鍏ャ€佽闊虫彁浜ゃ€佹枃鏈€変腑銆佹枃浠舵嫋鎷藉洓绫诲叆鍙ｏ紝骞朵笖浼氱户缁鐢ㄥ悗绔繑鍥炵殑鍚屼竴鏉′細璇濓紝涓嶅啀鍦ㄥ墠绔嚜閫犱細璇濋摼璺€?
-- [x] 杩戝満蹇嵎鑳藉姏宸茬粡褰㈡垚鏈€灏忛棴鐜細鍓创鏉裤€佹埅灞忋€佸綋鍓嶇獥鍙ｄ笂涓嬫枃銆佺粨鏋滆嚜鍔ㄦ墦寮€銆佷换鍔¤鎯呰烦杞€佺疆椤舵皵娉¤緟绐楅兘宸茬粡鑳藉涓插埌鍚屼竴濂楄繎鍦烘壙鎺ヤ綋楠岄噷銆?
+- [x] 悬浮球语音承接链已经具备完整的手势闭环：长按进入收音、上滑锁定、下滑取消、松开提交，以及录音时的 helper 提示与输入辅窗联动。
+- [x] 近场正式发起链已经覆盖悬停输入、语音提交、文本选中、文件拖拽四类入口，并且会继续复用后端返回的同一条会话，不再在前端自造会话链路。
+- [x] 近场快捷能力已经形成最小闭环：剪贴板、截屏、当前窗口上下文、结果自动打开、任务详情跳转、置顶气泡辅窗都已经能够串到同一套近场承接体验里。
 
-##### 鎸夊綋鍓嶄唬鐮侀噸鏁村悗鐨勫墿浣欎换鍔?
+##### 按当前代码重整后的剩余任务
 
-- [ ] 琛ラ綈鈥滄皵娉℃搷浣溾€濊繖涓師瀛愬姛鑳斤細鏅€氭秷鎭皵娉￠渶瑕佺洿鎺ユ敮鎸佺疆椤躲€佸垹闄ゃ€佹仮澶嶏紝骞朵笖缃《鍚庣殑鐙珛杈呯獥鍜屼富姘旀场瑕佷繚鎸佸悓涓€濂楃敓鍛藉懆鏈熴€?
-- [ ] 琛ラ綈鈥滄剰鍥剧‘璁ゆ皵娉♀€濊繖涓師瀛愬姛鑳斤細褰撶郴缁熻繘鍏ユ剰鍥剧‘璁ゆ€佹椂锛岀敤鎴烽渶瑕佽兘鍦ㄦ皵娉￠噷鐩存帴纭锛屽苟鑳藉€熺敤涓嬫柟杞婚噺杈撳叆鍖轰慨姝ｆ剰鍥撅紱鏄惧紡鍙栨秷 / 鎷掔粷璺緞浠嶅緟琛ラ綈锛岃€屼笉鏄彧鐪嬪埌涓€娈佃鏄庢枃鏈€?
-- [ ] 琛ラ綈鈥滈敊璇俊鎭壙鎺モ€濊繖涓師瀛愬姛鑳斤細褰撳墠绐楀彛鎴栧綋鍓嶉〉闈㈠嚭鐜版姤閿欐椂锛岀敤鎴烽渶瑕佽兘鐩存帴鎶婇敊璇綔涓轰换鍔″璞￠€佸叆閿欒鍒嗘瀽閾撅紝鑰屼笉鏄厛鎵嬪姩鏀瑰啓鎴愭櫘閫氳緭鍏ャ€?
-- [ ] 琛ラ綈鈥滆繎鍦轰富閾惧彲鍥炲綊鈥濊繖涓師瀛愬姛鑳斤細鎮仠杈撳叆銆佽闊虫彁浜ゃ€佹枃鏈€変腑銆佹枃浠舵嫋鎷姐€佹剰鍥剧‘璁よ繖鍑犳潯杩戝満閾捐矾瑕佽兘鍗曠嫭鍥炲綊锛屼笉鍐嶈浠〃鐩樺崗璁紓绉讳竴璧锋嫋姝汇€?
+- [ ] 补齐“气泡操作”这个原子功能：普通消息气泡需要直接支持置顶、删除、恢复，并且置顶后的独立辅窗和主气泡要保持同一套生命周期。
+- [ ] 补齐“意图确认气泡”这个原子功能：当系统进入意图确认态时，用户需要能在气泡里直接确认、取消、修正意图，而不是只看到一段说明文本。
+- [ ] 补齐“错误信息承接”这个原子功能：当前窗口或当前页面出现报错时，用户需要能直接把错误作为任务对象送入错误分析链，而不是先手动改写成普通输入。
+- [ ] 补齐“近场主链可回归”这个原子功能：悬停输入、语音提交、文本选中、文件拖拽、意图确认这几条近场链路要能单独回归，不再被仪表盘协议漂移一起拖死。
 
-#### 渚濊禆涓庡崗浣滆竟鐣?
+#### 依赖与协作边界
 
-- 渚濊禆 3鍙?鎻愪緵绐楀彛鎺у埗銆丷PC銆佽闃呫€佹嫋鎷戒笌骞冲彴闆嗘垚銆?
-- 渚濊禆 4鍙?鎻愪緵 `task / bubble_message / delivery_result` 鐨勭湡瀹炶繑鍥炶涔夈€?
-- 涓嶈礋璐ｅ畾涔夊崗璁瓧娈碉紝涓嶈礋璐ｅ畾涔夊悗绔姸鎬併€?
+- 依赖 3号 提供窗口控制、RPC、订阅、拖拽与平台集成。
+- 依赖 4号 提供 `task / bubble_message / delivery_result` 的真实返回语义。
+- 不负责定义协议字段，不负责定义后端状态。
 
-#### 浜や粯楠屾敹鏍囧噯
+#### 交付验收标准
 
-- [x] 鎮仠杈撳叆銆佽闊虫彁浜ゃ€佹枃鏈€変腑銆佹枃浠舵嫋鎷藉洓鏉¤繎鍦哄叆鍙ｉ兘宸插叿澶囨寮忛摼璺紝涓嶅啀鍙潬 demo 鏁版嵁椹卞姩銆?
-- [ ] 鐢ㄦ埛鍦ㄦ皵娉?UI 涓婅兘鐩存帴瀹屾垚纭銆佸彇娑堛€佺疆椤躲€佸垹闄よ繖浜涜繎鍦烘搷浣滐紝涓嶉渶瑕佸啀缁曞埌鍒殑椤甸潰鎴栭殣钘忎簨浠堕摼銆?
-- [ ] `corepack pnpm --dir apps/desktop test:shell-ball` 鎭㈠閫氳繃锛屼笖涓嶅啀琚?dashboard/task-detail 鐨勫崗璁紓绉婚樆濉炵紪璇戙€?
+- [x] 悬停输入、语音提交、文本选中、文件拖拽四条近场入口都已具备正式链路，不再只靠 demo 数据驱动。
+- [ ] 用户在气泡 UI 上能直接完成确认、取消、置顶、删除这些近场操作，不需要再绕到别的页面或隐藏事件链。
+- [ ] `corepack pnpm --dir apps/desktop test:shell-ball` 恢复通过，且不再被 dashboard/task-detail 的协议漂移阻塞编译。
 
-### 6.2 2鍙凤細鍓嶇宸ヤ綔鍙般€佺粨鏋滄壙鎺ヤ笌鍙鍖栦富璐?
+### 6.2 2号：前端工作台、结果承接与可视化主责
 
-#### 涓昏矗妯″潡
+#### 主责模块
 
-- 浠〃鐩橀椤?
-- 浠诲姟鐘舵€侀〉
-- 浠诲姟宸℃椤?
-- 闀滃瓙椤?
-- 瀹夊叏鍗＋椤?
-- 缁撴灉椤典笌浠诲姟璇︽儏椤?
-- 鎺у埗闈㈡澘瑙嗗浘灞?
+- 仪表盘首页
+- 任务状态页
+- 任务巡检页
+- 镜子页
+- 安全卫士页
+- 结果页与任务详情页
+- 控制面板视图层
 
-#### 褰撳墠浠ｇ爜涓庡墿浣欎换鍔￠噸鏁?
+#### 当前代码与剩余任务重整
 
-##### 褰撳墠浠ｇ爜宸插畬鎴愮殑鍩虹椤?
+##### 当前代码已完成的基础项
 
-- [x] 浠诲姟宸ヤ綔鍙板凡缁忓叿澶囨渶灏忓彲鐢ㄧ殑浠诲姟涓昏鍥撅細浠诲姟鍒楄〃銆佷换鍔¤鎯呫€佽繍琛屾椂浜嬩欢銆佷换鍔℃帶鍒躲€佽ˉ鍏呮寚浠よ繖浜涙搷浣滈兘宸茬粡鑳藉湪鍚屼竴濂椾换鍔￠〉閲屽畬鎴愩€?
-- [x] 姝ｅ紡缁撴灉鎵挎帴宸茬粡褰㈡垚缁熶竴鍑哄彛锛氫骇鐗╁垪琛ㄣ€佹寮忎氦浠樸€佹枃浠舵墦寮€銆佷换鍔¤鎯呰烦杞€佸畨鍏ㄩ〉娣遍摼閮藉凡缁忚兘璧板悓涓€濂楃粨鏋滄壙鎺ヨ矾寰勩€?
-- [x] 浠〃鐩橀椤点€侀暅瀛愰〉銆佷簨椤归〉銆佸畨鍏ㄩ〉閮藉凡缁忎粠鈥滈〉闈㈤鏋垛€濊繘鍏モ€滅湡瀹炴暟鎹叆鍙ｂ€濋樁娈碉紝鐢ㄦ埛鍙互鐩存帴鍦ㄨ繖浜涢〉闈㈢湅鍒版寮忓璞¤€屼笉鏄┖澹炽€?
+- [x] 任务工作台已经具备最小可用的任务主视图：任务列表、任务详情、运行时事件、任务控制、补充指令这些操作都已经能在同一套任务页里完成。
+- [x] 正式结果承接已经形成统一出口：产物列表、正式交付、文件打开、任务详情跳转、安全页深链都已经能走同一套结果承接路径。
+- [x] 仪表盘首页、镜子页、事项页、安全页都已经从“页面骨架”进入“真实数据入口”阶段，用户可以直接在这些页面看到正式对象而不是空壳。
 
-##### 鎸夊綋鍓嶄唬鐮侀噸鏁村悗鐨勫墿浣欎换鍔?
+##### 按当前代码重整后的剩余任务
 
-- [ ] 琛ラ綈鈥滀换鍔¤鎯呮寮忕粨鏋勮縼绉烩€濊繖涓師瀛愬姛鑳斤細浠诲姟椤靛拰瀹夊叏椤甸渶瑕佺粺涓€鍒囧埌鏈€鏂扮殑 task detail 姝ｅ紡缁撴瀯锛屼笉鑳界户缁寜鏃?detail payload 鍙栧瓧娈点€?
-- [ ] 琛ラ綈鈥滃畨鍏ㄩ〉澶辫触/璇佹嵁灞曠ず鈥濊繖涓師瀛愬姛鑳斤細澶辫触鎽樿銆佸紩鐢ㄨ瘉鎹€佽仛鐒︿换鍔¤鎯呰鍩轰簬褰撳墠姝ｅ紡瀵硅薄閲嶆柊瑁呴厤锛岃€屼笉鏄户缁部鐢ㄦ棫瀛楁鎷兼帴銆?
-- [ ] 琛ラ綈鈥滀华琛ㄧ洏鍚堝悓鍥炲綊鈥濊繖涓師瀛愬姛鑳斤細dashboard 鐨勫悎鍚屾祴璇曡鎭㈠鎴愬彲鎵ц鍥炲綊绾匡紝涓嶈兘鍋滅暀鍦ㄦ祴璇曟枃浠惰嚜宸遍兘缂栦笉杩囩殑鐘舵€併€?
-- [ ] 琛ラ綈鈥滈〉闈㈡暟鎹ā寮忓喕缁撯€濊繖涓師瀛愬姛鑳斤細瑕佹槑纭摢浜涢〉闈㈢户缁繚鐣欏紑鍙戞€?mock锛屽摢浜涢〉闈㈠彧鍏佽 RPC 涓嶅彲鐢ㄦ椂鐨勫彧璇?fallback锛屼笉鑳芥瘡涓〉闈㈣嚜宸卞畾涔変竴濂楀彛寰勩€?
-- [ ] 琛ラ綈鈥滅ず渚嬫暟鎹笌姝ｅ紡瑁呴厤鎷嗗眰鈥濊繖涓師瀛愬姛鑳斤細mock 绀轰緥鏁版嵁鍙礋璐ｆ紨绀猴紝姝ｅ紡瀛楁鏍￠獙銆佸鑸姸鎬佸拰椤甸潰瑁呴厤涓嶈兘鍐嶅弽鍚戜緷璧?mock 椤甸潰琛屼负銆?
+- [ ] 补齐“任务详情正式结构迁移”这个原子功能：任务页和安全页需要统一切到最新的 task detail 正式结构，不能继续按旧 detail payload 取字段。
+- [ ] 补齐“安全页失败/证据展示”这个原子功能：失败摘要、引用证据、聚焦任务详情要基于当前正式对象重新装配，而不是继续沿用旧字段拼接。
+- [ ] 补齐“仪表盘合同回归”这个原子功能：dashboard 的合同测试要恢复成可执行回归线，不能停留在测试文件自己都编不过的状态。
+- [ ] 补齐“页面数据模式冻结”这个原子功能：要明确哪些页面继续保留开发态 mock，哪些页面只允许 RPC 不可用时的只读 fallback，不能每个页面自己定义一套口径。
+- [ ] 补齐“示例数据与正式装配拆层”这个原子功能：mock 示例数据只负责演示，正式字段校验、导航状态和页面装配不能再反向依赖 mock 页面行为。
 
-#### 渚濊禆涓庡崗浣滆竟鐣?
+#### 依赖与协作边界
 
-- 渚濊禆 3鍙?鎻愪緵 Query銆丼tore銆乂iewModel銆佽闃呭埛鏂般€?
-- 渚濊禆 4鍙枫€?鍙?鎻愪緵 `task / artifact / audit / recovery_point / memory` 鐨勭湡瀹炲璞°€?
-- 涓嶈礋璐ｅ钩鍙版ˉ鎺ワ紝涓嶈礋璐ｅ崗璁湡婧愬畾涔夈€?
+- 依赖 3号 提供 Query、Store、ViewModel、订阅刷新。
+- 依赖 4号、5号 提供 `task / artifact / audit / recovery_point / memory` 的真实对象。
+- 不负责平台桥接，不负责协议真源定义。
 
-#### 浜や粯楠屾敹鏍囧噯
+#### 交付验收标准
 
-- [x] 鍙屽嚮鎮诞鐞冨悗鍙湅鍒扮湡瀹為椤垫€昏銆?
-- [x] 浠诲姟鍒楄〃銆佷换鍔¤鎯呫€佸畨鍏ㄦ憳瑕侊紝浠ュ強姝ｅ紡缁撴灉鎵撳紑閾鹃兘宸茬粡鏈夌湡瀹為〉闈㈡壙鎺ャ€?
-- [ ] 浠诲姟椤点€佸畨鍏ㄩ〉銆佷簨椤归〉銆侀暅瀛愰〉鍏ㄩ儴鑳藉湪鏈€鏂?protocol 涓嬬ǔ瀹氱紪璇戯紝骞舵仮澶嶄华琛ㄧ洏鍚堝悓娴嬭瘯鍥炲綊绾裤€?
+- [x] 双击悬浮球后可看到真实首页总览。
+- [x] 任务列表、任务详情、安全摘要，以及正式结果打开链都已经有真实页面承接。
+- [ ] 任务页、安全页、事项页、镜子页全部能在最新 protocol 下稳定编译，并恢复仪表盘合同测试回归线。
 
-### 6.3 3鍙凤細鍓嶇鍗忚銆佺姸鎬佷笌骞冲彴闆嗘垚涓昏矗
+### 6.3 3号：前端协议、状态与平台集成主责
 
-#### 涓昏矗妯″潡
+#### 主责模块
 
 - Typed JSON-RPC Client
-- 鍓嶇 RPC methods / subscriptions
+- 前端 RPC methods / subscriptions
 - Store / Query / ViewModel
-- 澶氱獥鍙ｅ崗璋?
-- 鎵樼洏銆佸揩鎹烽敭銆佹嫋鎷姐€佹枃浠躲€佹湰鍦板瓨鍌?
-- Named Pipe 杩炴帴涓庨噸杩?
+- 多窗口协调
+- 托盘、快捷键、拖拽、文件、本地存储
+- Named Pipe 连接与重连
 
-#### 褰撳墠浠ｇ爜涓庡墿浣欎换鍔￠噸鏁?
+#### 当前代码与剩余任务重整
 
-##### 褰撳墠浠ｇ爜宸插畬鎴愮殑鍩虹椤?
+##### 当前代码已完成的基础项
 
-- [x] 鍓嶇姝ｅ紡 RPC 鍖呰灞傚凡缁忔垚鍨嬶細椤甸潰灞傚凡缁忓彲浠ラ€氳繃缁熶竴鏂规硶鍏ュ彛璁块棶 task銆乻ecurity銆乻ettings銆乨ashboard銆乵irror銆乶otepad銆乸lugin 绛?stable 鑳藉姏锛岃€屼笉鏄嚜宸辨墜鍐?RPC 鏂规硶鍚嶃€?
-- [x] 鍓嶇姝ｅ紡閫氱煡妗ュ凡缁忔垚鍨嬶細浠诲姟鏇存柊銆佺粨鏋滃氨缁€佸緟鎺堟潈銆侀暅瀛愭洿鏂般€佷换鍔¤繍琛屾椂閫氱煡閮藉凡缁忚兘閫氳繃缁熶竴璁㈤槄灞傚洖娴佸埌椤甸潰銆?
-- [x] 妗岄潰骞冲彴妗ュ凡缁忔垚鍨嬶細Named Pipe 璇锋眰/璁㈤槄銆佸绐楀彛鍒涘缓涓庤仛鐒︺€佹墭鐩樻墦寮€鎺у埗闈㈡澘銆乻hell-ball helper window/pinned bubble 绠＄悊閮藉凡缁忔湁缁熶竴骞冲彴灞傚叆鍙ｃ€?
-- [x] 鍚庣鎷ユ湁鐨勪細璇濆鐢ㄦ満鍒跺凡缁忔帴鍏ュ墠绔細鍓嶇浼氱户缁部鐢ㄥ悗绔繑鍥炵殑浼氳瘽锛岃€屼笉鏄嚜宸辩敓鎴愪竴濂楃嫭绔?session銆?
+- [x] 前端正式 RPC 包装层已经成型：页面层已经可以通过统一方法入口访问 task、security、settings、dashboard、mirror、notepad、plugin 等 stable 能力，而不是自己手写 RPC 方法名。
+- [x] 前端正式通知桥已经成型：任务更新、结果就绪、待授权、镜子更新、任务运行时通知都已经能通过统一订阅层回流到页面。
+- [x] 桌面平台桥已经成型：Named Pipe 请求/订阅、多窗口创建与聚焦、托盘打开控制面板、shell-ball helper window/pinned bubble 管理都已经有统一平台层入口。
+- [x] 后端拥有的会话复用机制已经接入前端：前端会继续沿用后端返回的会话，而不是自己生成一套独立 session。
 
-##### 鎸夊綋鍓嶄唬鐮侀噸鏁村悗鐨勫墿浣欎换鍔?
+##### 按当前代码重整后的剩余任务
 
-- [ ] 琛ラ綈鈥滃墠绔寮忕湡婧愭敹鍙ｂ€濊繖涓師瀛愬姛鑳斤細瑕佹妸 seeded demo task銆侀〉闈㈢鏈?formal state 杩欎簺骞惰鐪熸簮鏀舵帀锛岃浠诲姟鐪熸簮鍙墿 query/store + protocol adapter 涓ゅ眰銆?
-- [ ] 琛ラ綈鈥滆缃崗璁€傞厤缁熶竴鈥濊繖涓師瀛愬姛鑳斤細妗岄潰鏈湴璁剧疆銆佹祴璇曟々銆佸悎鍚屾牎楠岄兘瑕佺粺涓€鎸夋渶鏂?settings snapshot 璇箟宸ヤ綔锛屼笉鑳藉啀鏈変汉鎸夋棫 `data_log / 鎵佸钩 models` 璇诲啓銆?
-- [ ] 琛ラ綈鈥滈〉闈㈠埛鏂拌鍒欏叡浜€濊繖涓師瀛愬姛鑳斤細棣栭〉銆佷换鍔￠〉銆佷簨椤归〉銆侀暅瀛愰〉銆佸畨鍏ㄩ〉閲岄噸澶嶇殑 RPC fallback銆乻ource badge銆佸埛鏂拌鍒掋€乮nvalidate 瑙勫垯瑕佹敹鎴愬叡浜瓥鐣ャ€?
-- [ ] 琛ラ綈鈥滈€氱煡鍥炴祦鍏变韩妗モ€濊繖涓師瀛愬姛鑳斤細浠诲姟鏇存柊銆佺粨鏋滃氨缁€佽繍琛屾椂閫氱煡鍛戒腑鍚庯紝椤甸潰鍒锋柊鍔ㄤ綔瑕佽蛋鍏变韩 bridge锛屼笉鍐嶈浠诲姟椤点€佸畨鍏ㄩ〉銆乻hell-ball 鍚勮嚜鎵嬪啓涓€浠藉洖娴侀€昏緫銆?
+- [ ] 补齐“前端正式真源收口”这个原子功能：要把 seeded demo task、页面私有 formal state 这些并行真源收掉，让任务真源只剩 query/store + protocol adapter 两层。
+- [ ] 补齐“设置协议适配统一”这个原子功能：桌面本地设置、测试桩、合同校验都要统一按最新 settings snapshot 语义工作，不能再有人按旧 `data_log / 扁平 models` 读写。
+- [ ] 补齐“页面刷新规则共享”这个原子功能：首页、任务页、事项页、镜子页、安全页里重复的 RPC fallback、source badge、刷新计划、invalidate 规则要收成共享策略。
+- [ ] 补齐“通知回流共享桥”这个原子功能：任务更新、结果就绪、运行时通知命中后，页面刷新动作要走共享 bridge，不再让任务页、安全页、shell-ball 各自手写一份回流逻辑。
 
-#### 渚濊禆涓庡崗浣滆竟鐣?
+#### 依赖与协作边界
 
-- 渚濊禆 4鍙?鍐荤粨鍗忚鏂规硶璇箟涓庤繑鍥炲璞°€?
-- 渚濊禆 5鍙?鍐荤粨閿欒鐮併€佽竟鐣岀瓥鐣ャ€佽缃笌鏁版嵁褰掑睘銆?
-- 涓嶈礋璐ｄ笟鍔¤鍒掞紝涓嶈礋璐ｅ悗绔姸鎬佹満銆?
+- 依赖 4号 冻结协议方法语义与返回对象。
+- 依赖 5号 冻结错误码、边界策略、设置与数据归属。
+- 不负责业务规划，不负责后端状态机。
 
-#### 浜や粯楠屾敹鏍囧噯
+#### 交付验收标准
 
-- [x] stable 鏂规硶鍖呰銆佹牳蹇冮€氱煡妗ャ€佸绐楀彛 / 鎵樼洏 / Named Pipe 鍩虹妗ラ兘宸茬粡鍏峰姝ｅ紡鍏ュ彛銆?
-- [x] `task.updated / delivery.ready / approval.pending` 鑳界ǔ瀹氬洖鍐欏墠绔€?
-- [ ] 鍓嶇鍙墿 query/store + protocol adapter 涓ゅ眰姝ｅ紡鐪熸簮锛屼笉鍐嶄繚鐣?seeded demo task銆佹棫鍗忚娴嬭瘯妗╁拰椤甸潰绉佹湁 formal state 涓夊骞惰鍙ｅ緞銆?
-- [ ] `corepack pnpm --dir apps/desktop test:shell-ball` 涓?`corepack pnpm --dir apps/desktop test:dashboard` 鍦ㄦ渶鏂?protocol 瀵煎嚭涓嬫仮澶嶉€氳繃銆?
+- [x] stable 方法包装、核心通知桥、多窗口 / 托盘 / Named Pipe 基础桥都已经具备正式入口。
+- [x] `task.updated / delivery.ready / approval.pending` 能稳定回写前端。
+- [ ] 前端只剩 query/store + protocol adapter 两层正式真源，不再保留 seeded demo task、旧协议测试桩和页面私有 formal state 三套并行口径。
+- [ ] `corepack pnpm --dir apps/desktop test:shell-ball` 与 `corepack pnpm --dir apps/desktop test:dashboard` 在最新 protocol 导出下恢复通过。
 
-### 6.4 4鍙凤細鍚庣 Harness 涓婚摼璺笌鍗忚鏀跺彛涓昏矗
+### 6.4 4号：后端 Harness 主链路与协议收口主责
 
-#### 涓昏矗妯″潡
+#### 主责模块
 
 - JSON-RPC Server
 - Orchestrator
 - Context Manager
 - Intent / Planning
-- RunEngine / Task 鐘舵€佹満
+- RunEngine / Task 状态机
 - Delivery
-- 涓婚摼璺煡璇㈣閰?
+- 主链路查询装配
 
-#### 褰撳墠浠ｇ爜涓庡墿浣欎换鍔￠噸鏁?
+#### 当前代码与剩余任务重整
 
-##### 褰撳墠浠ｇ爜宸插畬鎴愮殑鍩虹椤?
+##### 当前代码已完成的基础项
 
-- [x] 鈥滀换鍔″垱寤轰笌纭涓婚摼鈥濆凡缁忛棴鐜細鐢ㄦ埛杈撳叆鑳借繘鍏ユ寮?task锛屼换鍔″彲浠ヨ纭銆佽ˉ鍏呮垨缁х画鎺ㄨ繘锛屼笉鍐嶅仠鐣欏湪瑁?run 鎴栨紨绀烘€佸璞°€?
-- [x] 鈥滀换鍔℃煡璇笌鎺у埗涓婚摼鈥濆凡缁忛棴鐜細浠诲姟鍒楄〃銆佷换鍔¤鎯呫€佷换鍔℃帶鍒躲€丯otepad 鍗囩骇浠诲姟銆佷华琛ㄧ洏鎬昏閮藉凡缁忕粺涓€鍥炲埌 task-centric 璇讳晶锛岃€屼笉鏄墠鍚庣鍚勭淮鎶や竴濂楀璞°€?
-- [x] 鈥滄寮忎氦浠樺嚭鍙ｂ€濆凡缁忛棴鐜細鎵ц缁撴灉宸茬粡缁熶竴杩涘叆 `delivery_result / artifact`锛屽苟涓旇嚦灏戞湁涓€鏉＄湡瀹炴墽琛岄摼鍙互琚墠绔洿鎺ユ壙鎺ャ€?
-- [x] 鈥滆繍琛屾椂瑙傚療涓庤ˉ鍏呮寚浠も€濆凡缁忛棴鐜細浠诲姟浜嬩欢銆佽ˉ鍏呮寚浠ゃ€乣task.steered` 涓?`loop.*` 閫氱煡閮藉凡缁忚繘鍏ユ寮忔煡璇㈠拰鍓嶇娑堣垂閾俱€?
-- [x] 鈥滃睆骞曟劅鐭ヤ富閾锯€濆凡缁忓叿澶囨寮忓叆鍙ｏ細灞忓箷/椤甸潰涓婁笅鏂囪兘澶熻繘鍏?task 鍒涘缓銆佺瓑寰呮巿鏉冦€佽瘉鎹惤鐩樺拰浠诲姟璇︽儏鍥炵湅锛屼笉鍐嶄緷璧栧苟琛屽叆鍙ｆ垨瑁稿钩鍙板璞°€?
-- [x] 鈥滆繍琛屾椂绋冲畾鍖栤€濆凡缁忓舰鎴愮涓€杞簳搴э細planner retry銆乼ool timeout retry銆乭istory compaction銆乨oom loop 妫€娴嬨€乻top reason 璇箟閮藉凡缁忚繘鍏ユ寮忚繍琛屾椂璇箟銆?
+- [x] “任务创建与确认主链”已经闭环：用户输入能进入正式 task，任务可以被确认、补充或继续推进，不再停留在裸 run 或演示态对象。
+- [x] “任务查询与控制主链”已经闭环：任务列表、任务详情、任务控制、Notepad 升级任务、仪表盘总览都已经统一回到 task-centric 读侧，而不是前后端各维护一套对象。
+- [x] “正式交付出口”已经闭环：执行结果已经统一进入 `delivery_result / artifact`，并且至少有一条真实执行链可以被前端直接承接。
+- [x] “运行时观察与补充指令”已经闭环：任务事件、补充指令、`task.steered` 与 `loop.*` 通知都已经进入正式查询和前端消费链。
+- [x] “屏幕感知主链”已经具备正式入口：屏幕/页面上下文能够进入 task 创建、等待授权、证据落盘和任务详情回看，不再依赖并行入口或裸平台对象。
+- [x] “运行时稳定化”已经形成第一轮底座：planner retry、tool timeout retry、history compaction、doom loop 检测、stop reason 语义都已经进入正式运行时语义。
 
-#### 渚濊禆涓庡崗浣滆竟鐣?
+#### 依赖与协作边界
 
-- 渚濊禆 5鍙?鎻愪緵 model銆乼ools銆乺isk銆乵emory銆乻torage銆乸latform 鐨勫彲鐢ㄥ簳搴с€?
-- 涓?3鍙峰叡鍚屽喕缁撳崗璁涔夛紝涓?2鍙峰榻愭煡璇㈣鍥炬暟鎹粨鏋勩€?
-- 涓嶈礋璐ｅ墠绔眬閮ㄧ姸鎬佷笌瑙嗚琛ㄧ幇銆?
+- 依赖 5号 提供 model、tools、risk、memory、storage、platform 的可用底座。
+- 与 3号共同冻结协议语义，与 2号对齐查询视图数据结构。
+- 不负责前端局部状态与视觉表现。
 
-#### 浜や粯楠屾敹鏍囧噯
+#### 交付验收标准
 
-- [x] P0 涓婚摼璺帴鍙ｅ叏閮ㄥ彲鑱旇皟銆?
-- [x] `task_id` 涓?`run_id` 鏄犲皠绋冲畾銆?
-- [x] 鑷冲皯涓€鏉＄湡瀹炴墽琛岄摼鑳戒骇鍑烘寮忎氦浠樼粨鏋滃苟琚墠绔壙鎺ャ€?
+- [x] P0 主链路接口全部可联调。
+- [x] `task_id` 与 `run_id` 映射稳定。
+- [x] 至少一条真实执行链能产出正式交付结果并被前端承接。
 
-##### 鎸夊綋鍓嶄唬鐮侀噸鏁村悗鐨勫墿浣欎换鍔?
+##### 按当前代码重整后的剩余任务
 
-- [ ] 琛ラ綈鈥滆繍琛屾€佸伐浣滃彴缁嗙矑搴︽壙鎺モ€濊繖涓師瀛愬姛鑳斤細褰撳墠浠诲姟璇︽儏鍜屼华琛ㄧ洏宸茬粡鑳界湅鍒拌繍琛屾€佹憳瑕侊紝浣嗚繕闇€瑕佹妸鏇村杩愯涓俊鍙风ǔ瀹氭壙鎺ュ埌宸ヤ綔鍙帮紝鑰屼笉鏄彧灞曠ず鏈€灏忔憳瑕併€?
-- [ ] 琛ラ綈鈥滈珮椋庨櫓鍔ㄤ綔璺ㄧ楠屾敹鈥濊繖涓師瀛愬姛鑳斤細鑷冲皯涓€鏉￠珮椋庨櫓鍔ㄤ綔闇€瑕佹寔缁繚鎸佲€滄巿鏉冭姹?-> 鎭㈠鐐?-> 瀹¤ -> 缁撴灉鎵挎帴鈥濆叏閾惧彲鍥炲綊锛岃€屼笉鏄彧鍦ㄥ崟娆¤仈璋冩椂璺戦€氳繃銆?
-- [ ] 琛ラ綈鈥滃睆骞曟劅鐭ュけ璐ヨ涔夊喕缁撯€濊繖涓師瀛愬姛鑳斤細鎺堟潈鎷掔粷銆侀噰鏍峰け璐ャ€丱CR 澶辫触銆佷細璇濆け鏁堛€佹棤鏈夋晥璇嗗埆鍐呭閮借缁х画娌跨敤鏃㈡湁 task/event/delivery 璇箟锛屼笉寰楁墿鏁ｅ嚭鏂扮殑浼姸鎬併€?
-- [ ] 琛ラ綈鈥滃悗绔富閾惧洖褰掑熀绾库€濊繖涓師瀛愬姛鑳斤細浠诲姟鍒涘缓銆佷换鍔¤鎯呫€佺粨鏋滄壙鎺ャ€佽繍琛屾椂绋冲畾鍖栥€佽瑙変换鍔°€佽ˉ鍏呮寚浠よ繖浜涗富閾捐兘鍔涜缁存寔鎴愪竴濂楀彲闀挎湡鎵ц鐨勫洖褰掗泦鍚堛€?
+- [ ] 补齐“运行态工作台细粒度承接”这个原子功能：当前任务详情和仪表盘已经能看到运行态摘要，但还需要把更多运行中信号稳定承接到工作台，而不是只展示最小摘要。
+- [ ] 补齐“高风险动作跨端验收”这个原子功能：至少一条高风险动作需要持续保持“授权请求 -> 恢复点 -> 审计 -> 结果承接”全链可回归，而不是只在单次联调时跑通过。
+- [ ] 补齐“屏幕感知失败语义冻结”这个原子功能：授权拒绝、采样失败、OCR 失败、会话失效、无有效识别内容都要继续沿用既有 task/event/delivery 语义，不得扩散出新的伪状态。
+- [ ] 补齐“后端主链回归基线”这个原子功能：任务创建、任务详情、结果承接、运行时稳定化、视觉任务、补充指令这些主链能力要维持成一套可长期执行的回归集合。
 
-##### 灞忓箷鎰熺煡涓撻」
+##### 屏幕感知专项
 
-- [x] 鈥滆瑙変换鍔¤繘鍏ユ寮忎富閾锯€濊繖涓師瀛愬姛鑳藉凡缁忔垚绔嬶細鑷劧璇█瑙﹀彂鐨勫睆骞曞垎鏋愬彲浠ヨ繘鍏ユ寮?task锛岃€屼笉鏄緷璧栧苟琛屽叆鍙ｆ垨鍓嶇绉佹湁瀵硅薄銆?
-- [x] 鈥滃睆骞曡瘉鎹寮忎氦浠樷€濊繖涓師瀛愬姛鑳藉凡缁忔垚绔嬶細鎴浘璇佹嵁銆丱CR 鏂囨湰銆佸紩鐢ㄧ墖娈点€佹巿鏉冧笌瀹¤淇℃伅閮借兘澶熼€氳繃姝ｅ紡瀵硅薄鍥炲埌浠诲姟璇︽儏銆?
-- [x] 鈥滆瑙変换鍔＄姸鎬佸鐢ㄢ€濊繖涓師瀛愬姛鑳藉凡缁忔垚绔嬶細灞忓箷鎰熺煡涓嶄細鍐嶉澶栧彂鏄庝竴濂?task 鐘舵€侊紝鑰屾槸澶嶇敤鏃㈡湁 `waiting_auth / processing / completed / failed` 涓婚摼璇箟銆?
+- [x] “视觉任务进入正式主链”这个原子功能已经成立：自然语言触发的屏幕分析可以进入正式 task，而不是依赖并行入口或前端私有对象。
+- [x] “屏幕证据正式交付”这个原子功能已经成立：截图证据、OCR 文本、引用片段、授权与审计信息都能够通过正式对象回到任务详情。
+- [x] “视觉任务状态复用”这个原子功能已经成立：屏幕感知不会再额外发明一套 task 状态，而是复用既有 `waiting_auth / processing / completed / failed` 主链语义。
 
-### 6.5 5鍙凤細鍚庣鑳藉姏銆佹暟鎹€佹不鐞嗕笌鎵╁睍搴曞骇涓昏矗
+### 6.5 5号：后端能力、数据、治理与扩展底座主责
 
-#### 涓昏矗妯″潡
+#### 主责模块
 
 - model
 - tools
@@ -480,138 +480,138 @@ P3 璐熻矗鎵╁睍鐢熸€併€佽妯″寲銆佹彃浠跺寲銆佸�
 - plugin
 - workers
 
-#### 褰撳墠浠ｇ爜涓庡墿浣欎换鍔￠噸鏁?
+#### 当前代码与剩余任务重整
 
-##### 褰撳墠浠ｇ爜宸插畬鎴愮殑鍩虹椤?
+##### 当前代码已完成的基础项
 
-- [x] 鈥滄ā鍨嬫墽琛屽簳搴р€濆凡缁忔垚绔嬶細OpenAI Responses provider銆乸lanner/tool-calling銆乻ecret-source wiring 宸茬粡鑳芥敮鎾戞寮忔墽琛屼富閾俱€?
-- [x] 鈥滃伐鍏峰洖娴佹寮忓寲鈥濆凡缁忔垚绔嬶細鏂囦欢璇诲啓銆佸懡浠ゆ墽琛屻€佺綉椤佃鍙栥€丱CR銆丳laywright銆丮edia 杩欎簺鎵ц缁撴灉閮借兘缁熶竴杩涘叆 `tool_call / event / delivery_result`銆?
-- [x] 鈥滅粨鏋勫寲杩愯鎬佸瓨鍌ㄢ€濆凡缁忔垚绔嬶細浠诲姟銆佽繍琛屻€佷簨浠躲€佷氦浠樸€佷骇鐗┿€佽蹇嗐€佹不鐞嗐€乀race/Eval 閮藉凡缁忔湁 first-class 瀛樺偍灞傦紝涓嶅啀渚濊禆鍗曚竴蹇収瀛楁銆?
-- [x] 鈥滈闄╂不鐞嗗簳搴р€濆凡缁忔垚绔嬶細椋庨櫓鍒嗙骇銆佺瓑寰呮巿鏉冦€佹巿鏉冭褰曘€佸璁¤褰曘€佹仮澶嶇偣閮藉凡缁忓叿澶囨渶灏忛棴鐜€?
-- [x] 鈥淲orkspace / Artifact 钀界洏搴曞骇鈥濆凡缁忔垚绔嬶細姝ｅ紡浜や粯銆佹枃浠惰惤鐩樸€佸睆骞曡瘉鎹惤鐩橈紝浠ュ強 `open_file / reveal_in_folder / workspace_document` 杩欑被鎵撳紑鍔ㄤ綔鎵€闇€瀵硅薄閮藉凡缁忓叿澶囥€?
-- [x] 鈥滃睆骞?椤甸潰鎰熺煡搴曞骇鈥濆凡缁忔垚绔嬶細椤甸潰銆佸睆骞曘€佸彲瑙佹枃鏈€佸仠鐣欍€佸垏鎹㈢瓑淇″彿閮借兘杩涘叆鍚庣锛屽苟鏀拺 `screen_analyze` 姝ｅ紡閾捐矾銆?
-- [x] 鈥滄彃浠朵笌鎵╁睍璧勪骇鍙灞傗€濆凡缁忔垚绔嬶細鎻掍欢杩愯鎬併€佺増鏈寲 skill/blueprint/prompt 璧勪骇閮藉凡缁忚兘杩涘叆 execution / trace / eval 涓庝华琛ㄧ洏鏌ヨ銆?
-- [x] 鈥滄寮忚缃笌瀵嗛挜瀛樺偍鈥濆凡缁忔垚绔嬶細settings 宸茶繘鍏ョ粨鏋勫寲鎸佷箙鍖栵紝Stronghold 鐘舵€佷笌閿欒鐮佷篃宸叉垚涓烘寮忚缃涔夌殑涓€閮ㄥ垎銆?
-- [x] 鈥渟ession -> task -> run 鍏崇郴鐪熸簮鈥濆凡缁忔垚绔嬶細浼氳瘽銆佷换鍔°€佽繍琛屼箣闂寸殑鍏崇郴宸茬粡杩涘叆缁撴瀯鍖栨煡璇㈤摼锛岃€屼笉鏄彧闈?runtime 鍏煎蹇収銆?
+- [x] “模型执行底座”已经成立：OpenAI Responses provider、planner/tool-calling、secret-source wiring 已经能支撑正式执行主链。
+- [x] “工具回流正式化”已经成立：文件读写、命令执行、网页读取、OCR、Playwright、Media 这些执行结果都能统一进入 `tool_call / event / delivery_result`。
+- [x] “结构化运行态存储”已经成立：任务、运行、事件、交付、产物、记忆、治理、Trace/Eval 都已经有 first-class 存储层，不再依赖单一快照字段。
+- [x] “风险治理底座”已经成立：风险分级、等待授权、授权记录、审计记录、恢复点都已经具备最小闭环。
+- [x] “Workspace / Artifact 落盘底座”已经成立：正式交付、文件落盘、屏幕证据落盘，以及 `open_file / reveal_in_folder / workspace_document` 这类打开动作所需对象都已经具备。
+- [x] “屏幕/页面感知底座”已经成立：页面、屏幕、可见文本、停留、切换等信号都能进入后端，并支撑 `screen_analyze` 正式链路。
+- [x] “插件与扩展资产可见层”已经成立：插件运行态、版本化 skill/blueprint/prompt 资产都已经能进入 execution / trace / eval 与仪表盘查询。
+- [x] “正式设置与密钥存储”已经成立：settings 已进入结构化持久化，Stronghold 状态与错误码也已成为正式设置语义的一部分。
+- [x] “session -> task -> run 关系真源”已经成立：会话、任务、运行之间的关系已经进入结构化查询链，而不是只靠 runtime 兼容快照。
 
-##### 鎸夊綋鍓嶄唬鐮侀噸鏁村悗鐨勫墿浣欎换鍔?
+##### 按当前代码重整后的剩余任务
 
-- [ ] 缁х画瀹堜綇鈥滆缃寮忕湡婧愨€濊繖涓師瀛愬姛鑳斤細鍚庣 `settings.get / settings.update` 蹇呴』缁х画浠?`models / models.credentials` 涓哄敮涓€姝ｅ紡璇箟锛屼笉鑳借鍓嶇鍏煎鍒悕閲嶆柊鎷夊洖鏃х粨鏋勩€?
-- [ ] 缁х画瀹堜綇鈥滄墿灞曡兘鍔涜竟鐣屽喕缁撯€濊繖涓師瀛愬姛鑳斤細澶?provider銆佺ぞ鍖?Skills銆佹劅鐭ュ寘缁х画淇濇寔 planned 杈圭晫锛屼笉鍦ㄥ綋鍓嶉樁娈垫彁鍓嶆墿鏁ｆ垚绋冲畾浜у搧鍏ュ彛銆?
-- [ ] 缁х画瀹堜綇鈥滆渚у幓蹇収鍖栤€濊繖涓師瀛愬姛鑳斤細task list / task detail / dashboard / security 绛夎渚ц鎸佺画浼樺厛浣跨敤姝ｅ紡琛ㄥ拰姝ｅ紡瀵硅薄锛屼笉鍥為€€鎴?snapshot_json 鎷艰銆?
-- [ ] 缁х画瀹堜綇鈥滃悗绔敊璇爜姝ｅ紡鍖栤€濊繖涓師瀛愬姛鑳斤細model/provider/storage/settings/stronghold 鐩稿叧澶辫触閮借缁х画璧版寮忛敊璇爜锛屼笉鍥為€€鎴愬眬閮ㄥ瓧绗︿覆鎶ラ敊銆?
+- [ ] 继续守住“设置正式真源”这个原子功能：后端 `settings.get / settings.update` 必须继续以 `models / models.credentials` 为唯一正式语义，不能被前端兼容别名重新拉回旧结构。
+- [ ] 继续守住“扩展能力边界冻结”这个原子功能：多 provider、社区 Skills、感知包继续保持 planned 边界，不在当前阶段提前扩散成稳定产品入口。
+- [ ] 继续守住“读侧去快照化”这个原子功能：task list / task detail / dashboard / security 等读侧要持续优先使用正式表和正式对象，不回退成 snapshot_json 拼装。
+- [ ] 继续守住“后端错误码正式化”这个原子功能：model/provider/storage/settings/stronghold 相关失败都要继续走正式错误码，不回退成局部字符串报错。
 
-##### issue #261 灞忓箷鎰熺煡涓撻」锛?鍙凤級
+##### issue #261 屏幕感知专项（5号）
 
-- [x] 鈥滃睆骞曢噰鏍峰埌姝ｅ紡璇佹嵁鈥濊繖涓師瀛愬姛鑳藉凡缁忔垚绔嬶細鎴浘/鍏抽敭甯у彲浠ヨ繘鍏?OCR銆佺粨鏋勫寲瑙傚療銆乤rtifact銆乧itation seed銆佸璁″拰鎭㈠鐐归摼璺€?
-- [x] 鈥滃綍灞忕墖娈垫敮璺€濊繖涓師瀛愬姛鑳藉凡缁忔垚绔嬶細clip 鐗囨鍙互閫氳繃 media worker 鎶藉抚杩涘叆鍚屼竴濂?OCR 涓?artifact 钀界洏閾捐矾銆?
-- [x] 鈥渟creen session 娓呯悊娌荤悊鈥濊繖涓師瀛愬姛鑳藉凡缁忔垚绔嬶細杩囨湡 session 鎵弿銆佹樉寮?stop/expire cleanup銆佸紓甯告畫鐣欏洖鏀躲€乺etained artifact 鍒嗘祦閮藉凡钀藉湴銆?
-- [x] 鈥滃睆骞曚换鍔¤鎯呮寮忚閰嶁€濊繖涓師瀛愬姛鑳藉凡缁忔垚绔嬶細screen task detail 宸茬粡浼樺厛浣跨敤 artifact / citation / approval / authorization / audit锛岃€屼笉鏄洖鐪?tool output 鍏煎瀛楁銆?
+- [x] “屏幕采样到正式证据”这个原子功能已经成立：截图/关键帧可以进入 OCR、结构化观察、artifact、citation seed、审计和恢复点链路。
+- [x] “录屏片段支路”这个原子功能已经成立：clip 片段可以通过 media worker 抽帧进入同一套 OCR 与 artifact 落盘链路。
+- [x] “screen session 清理治理”这个原子功能已经成立：过期 session 扫描、显式 stop/expire cleanup、异常残留回收、retained artifact 分流都已落地。
+- [x] “屏幕任务详情正式装配”这个原子功能已经成立：screen task detail 已经优先使用 artifact / citation / approval / authorization / audit，而不是回看 tool output 兼容字段。
 
-#### 渚濊禆涓庡崗浣滆竟鐣?
+#### 依赖与协作边界
 
-- 涓?4鍙峰叡鍚屽喕缁撲富閾捐矾鍙皟鐢ㄨ兘鍔涖€?
-- 涓?3鍙?瀵归綈閿欒鐮併€佽缃」銆佸钩鍙拌竟鐣屾毚闇叉柟寮忋€?
-- 涓嶇洿鎺ュ畾涔夊墠绔〉闈㈢粨鏋勶紝涓嶇粫杩?orchestrator 瀵瑰鏆撮湶鑳藉姏銆?
+- 与 4号共同冻结主链路可调用能力。
+- 与 3号 对齐错误码、设置项、平台边界暴露方式。
+- 不直接定义前端页面结构，不绕过 orchestrator 对外暴露能力。
 
-#### 浜や粯楠屾敹鏍囧噯
+#### 交付验收标准
 
-- [x] 鑷冲皯涓€绉嶆ā鍨嬭皟鐢ㄣ€佷笁绫诲熀纭€宸ュ叿銆佹渶灏忓瓨鍌ㄩ棴鐜彲鐪熷疄宸ヤ綔銆?
-- [x] 鑷冲皯涓€鏉￠珮椋庨櫓鍔ㄤ綔鑳界暀涓嬫巿鏉冦€佸璁″拰鎭㈠鐐广€?
-- [x] issue #261 鐨勬渶灏忓睆骞曞垎鏋愰摼宸插彲鐪熷疄钀界洏 artifact锛屽苟鍥炴祦 citation / audit / recovery 鎽樿銆?
-- [x] Stronghold 姝ｅ紡 backend 涓?model/provider/storage error-code 鏀跺彛瀹屾垚鍚庯紝鍐嶈涓?5 鍙峰簳搴х湡姝ｆ敹灏俱€?
-
----
-
-## 7. 鎺ㄨ崘鐨勯樁娈垫帹杩涢『搴?
-
-### 7.1 绗竴闃舵锛氬厛琛ラ綈 P0 涓婚摼璺紝涓嶅啀鎵╂暎鏂伴潰
-
-- [x] 4鍙?+ 5鍙?鍏堟妸涓婚摼璺帴鍙ｃ€佹墽琛屻€佹不鐞嗐€佷氦浠樺拰瀛樺偍鐪熼棴鐜ˉ榻愩€?
-- [ ] 3鍙?鍚屾鎶?RPC銆佽闃呫€佺姸鎬佸洖鍐欏拰澶氱獥鍙ｆˉ鎺ユ墦閫氾紝閲嶇偣瑕嗙洊 `task.updated / delivery.ready / approval.pending / task.steered / loop.*` 涓庢墦寮€鏂囦欢/鐩綍鍔ㄤ綔妗ユ帴銆?
-- [ ] 1鍙?+ 2鍙?鍦ㄧ湡瀹炲璞″熀纭€涓婃帴杩戝満鍏ュ彛涓庡伐浣滃彴鎵挎帴锛屼笉鍐嶄緷璧栨湰鍦板亣鏁版嵁锛岄噸鐐硅鐩栨枃鏈€変腑銆佹枃浠舵嫋鎷姐€佽闊冲叆鍙ｃ€佷换鍔¤鎯呯粨鏋滃尯銆乤rtifact 鎵撳紑鍔ㄤ綔銆?
-
-### 7.2 绗簩闃舵锛氳ˉ P1 鍙寔缁娇鐢ㄨ兘鍔?
-
-- [ ] 宸℃銆佷换鍔¤鎯呫€佸畨鍏ㄨ鎯呫€侀暅瀛愬熀纭€灞曠ず銆佹仮澶嶄笌鍥炴粴鏌ョ湅銆乀oken/璐圭敤鎬昏渚濇鎺ㄨ繘锛岄噸鐐瑰舰鎴愮湡瀹為〉闈㈠叆鍙ｄ笌缁撴灉鎵挎帴锛岃€屼笉鏄彧鍋滅暀鍦ㄥ悗绔仛鍚堟暟鎹€?
-- [ ] OCR / Playwright / Stronghold / Trace / Eval / HITL 鎸夆€滃厛鎺ュ叆銆佸啀灞曠ず銆佸啀娌荤悊鈥濈殑椤哄簭鎺ㄨ繘锛岄噸鐐瑰舰鎴?task detail銆佸畨鍏ㄨ鎯呫€佽皟璇曡鍥句腑鐨勫彲瑙佺粨鏋溿€?
-
-### 7.3 绗笁闃舵锛氬啀鍋?P2 浣撻獙鍜屾櫤鑳藉寮?
-
-- [ ] 涓诲姩鎺ㄨ崘銆佷笂涓嬫枃鎰熺煡銆佸鍒惰涓烘劅鐭ャ€佽棰戞€荤粨銆侀暅瀛愬寮恒€佺敤鎴风敾鍍忕鐞嗚繘鍏ユ帓鏈燂紝閲嶇偣琛ラ綈鎺ㄨ崘鍐峰嵈绛栫暐銆佸睆骞?椤甸潰鎰熺煡杩涘叆涓婚摼璺€佽棰戞€荤粨姝ｅ紡浜や粯銆佺敤鎴风敾鍍忕紪杈戦潰鏉裤€?
-
-### 7.4 绗洓闃舵锛氭渶鍚庡啀鍋?P3 鐢熸€佹墿灞?
-
-- [ ] 澶氭彃浠躲€佸妯″瀷銆佺ぞ鍖?Skills銆佹劅鐭ュ寘銆佷簯鍚屾鍜屽洟闃熷崗浣滃湪 P0/P1 绋冲畾鍚庡啀杩涘叆涓绘帓鏈熴€?
+- [x] 至少一种模型调用、三类基础工具、最小存储闭环可真实工作。
+- [x] 至少一条高风险动作能留下授权、审计和恢复点。
+- [x] issue #261 的最小屏幕分析链已可真实落盘 artifact，并回流 citation / audit / recovery 摘要。
+- [x] Stronghold 正式 backend 与 model/provider/storage error-code 收口完成后，再视为 5 号底座真正收尾。
 
 ---
 
-## 8. 渚濊禆鍏崇郴涓庣姝㈤『搴?
+## 7. 推荐的阶段推进顺序
 
-### 8.1 姝ｇ‘椤哄簭
+### 7.1 第一阶段：先补齐 P0 主链路，不再扩散新面
 
-- [ ] 鍏堝喕缁撳崗璁€佸璞°€佺姸鎬併€侀敊璇爜銆佽〃缁撴瀯鍜岃竟鐣屻€?
-- [ ] 鍐嶆墦閫氫富閾捐矾缂栨帓銆佹墽琛屻€佹不鐞嗗拰浜や粯銆?
-- [ ] 鍐嶇敱鍓嶇鎺ヤ笂鐪熷疄鐘舵€佸拰鐪熷疄缁撴灉鎵挎帴銆?
-- [ ] 鍐嶅仛 P1 鎸佺画浣跨敤澧炲己銆?
-- [ ] 鏈€鍚庡啀鍋?P2 / P3 澧炲己涓庣敓鎬併€?
+- [x] 4号 + 5号 先把主链路接口、执行、治理、交付和存储真闭环补齐。
+- [ ] 3号 同步把 RPC、订阅、状态回写和多窗口桥接打通，重点覆盖 `task.updated / delivery.ready / approval.pending / task.steered / loop.*` 与打开文件/目录动作桥接。
+- [ ] 1号 + 2号 在真实对象基础上接近场入口与工作台承接，不再依赖本地假数据，重点覆盖文本选中、文件拖拽、语音入口、任务详情结果区、artifact 打开动作。
 
-### 8.2 涓嶅厑璁哥殑椤哄簭
+### 7.2 第二阶段：补 P1 可持续使用能力
 
-- [ ] 涓嶅厑璁稿墠绔厛鍐欏畬鏁撮〉闈㈠啀鍊掗€煎崗璁拰瀵硅薄銆?
-- [ ] 涓嶅厑璁?worker / plugin 鐩存帴杈撳嚭涓存椂 JSON 缁欏墠绔暱鏈熸秷璐广€?
-- [ ] 涓嶅厑璁?1鍙枫€?鍙枫€?鍙?鍚勮嚜缁存姢涓€濂楃姸鎬佹ā鍨嬨€?
-- [ ] 涓嶅厑璁?4鍙枫€?鍙?鍒嗗埆缁存姢涓ゅ schema 鎴栦袱濂楅敊璇爜璇箟銆?
-- [ ] 涓嶅厑璁镐互鈥滃厛婕旂ず鈥濅负鐞嗙敱缁曡繃鎺堟潈銆佸璁°€佹仮澶嶇偣鍜屾寮忎氦浠樺嚭鍙ｃ€?
+- [ ] 巡检、任务详情、安全详情、镜子基础展示、恢复与回滚查看、Token/费用总览依次推进，重点形成真实页面入口与结果承接，而不是只停留在后端聚合数据。
+- [ ] OCR / Playwright / Stronghold / Trace / Eval / HITL 按“先接入、再展示、再治理”的顺序推进，重点形成 task detail、安全详情、调试视图中的可见结果。
 
----
+### 7.3 第三阶段：再做 P2 体验和智能增强
 
-## 9. 閲岀▼纰戜笌鍕鹃€夋爣鍑?
+- [ ] 主动推荐、上下文感知、复制行为感知、视频总结、镜子增强、用户画像管理进入排期，重点补齐推荐冷却策略、屏幕/页面感知进入主链路、视频总结正式交付、用户画像编辑面板。
 
-### 9.1 M0锛氱粺涓€椤瑰喕缁?
+### 7.4 第四阶段：最后再做 P3 生态扩展
 
-- [ ] 鐩綍銆佸懡鍚嶃€佹牳蹇冨璞°€佸崗璁柟娉曘€侀敊璇爜銆佹暟鎹富妯″瀷銆佷富閾捐矾銆佽法骞冲彴鎶借薄鍏ㄩ儴瀵归綈锛屼笖 `packages/protocol`銆丟o runtime銆佸墠绔被鍨嬪眰鏃犳湭鐧昏涓存椂瀛楁銆?
-
-### 9.2 M1锛歅0 涓婚摼璺窇閫?
-
-- [ ] 涓夌涓诲叆鍙ｈ嚦灏戝悇瀹屾暣璺戦€氫竴娆★細鏂囨湰閫変腑銆佹枃浠舵嫋鎷姐€佽闊宠緭鍏ャ€?
-- [ ] 鑷冲皯涓€绉嶉珮椋庨櫓鍔ㄤ綔璺戦€氭巿鏉冮摼锛屽苟鑳藉湪瀹夊叏鎽樿鎴栦换鍔¤鎯呯湅鍒版巿鏉?/ 瀹¤ / 鎭㈠鐐圭粨鏋溿€?
-- [ ] 鑷冲皯涓€绉嶆寮忎氦浠樼湡瀹炲彲瑙侊紝涓旀敮鎸?`open_action` 鎴?artifact 鎵撳紑鍔ㄤ綔銆?
-- [ ] 浠〃鐩樿兘鐪嬪埌 `task / artifact / audit / recovery_point` 鐨勬渶灏忕粨鏋滐紝浠诲姟璇︽儏鑳界湅鍒?`delivery_result / security_summary / timeline` 鐨勫熀纭€鎵挎帴銆?
-- [x] 鑷冲皯鏈変竴娆¤蹇嗗懡涓垨璁板繂鎽樿鍐欏叆銆?
-
-### 9.3 M2锛歅1 鍙寔缁娇鐢?
-
-- [ ] 浠诲姟宸℃銆侀暅瀛愩€佸畨鍏ㄨ鎯呫€佹仮澶嶆煡鐪嬨€乀race/Eval銆乀oken/璐圭敤鍜岄绠楅檷绾ц繘鍏ュ彲鐢ㄦ€侊紝骞舵湁鑷冲皯涓€涓湡瀹為〉闈㈠叆鍙ｆ垨鑱旇皟褰曞儚璇佹槑鍙敤銆?
-
-### 9.4 M3锛歅2 / P3 澧炲己
-
-- [ ] 鎺ㄨ崘澧炲己銆佹劅鐭ュ寮恒€佽棰戞€荤粨銆佸妯″瀷銆佸鎻掍欢銆佺ぞ鍖?Skills 绛夎繘鍏ョǔ瀹氳凯浠ｏ紝骞舵槑纭摢浜涘睘浜庡悗绔簳搴с€佸摢浜涘睘浜庡墠绔壙鎺ャ€?
+- [ ] 多插件、多模型、社区 Skills、感知包、云同步和团队协作在 P0/P1 稳定后再进入主排期。
 
 ---
 
-## 10. 姣忓懆鍗忎綔鎵ц寤鸿
+## 8. 依赖关系与禁止顺序
 
-### 10.1 姣忓懆寮€濮嬪墠
+### 8.1 正确顺序
 
-- [ ] 姣忎釜浜虹‘璁ゆ湰鍛ㄤ换鍔℃槸鍚﹀睘浜庤嚜宸变富璐ｈ竟鐣屻€?
-- [ ] 姣忎釜浜虹‘璁や换鍔℃槸鍚﹀睘浜?P0 / P1 / P2 / P3 涓殑鍝竴灞傘€?
-- [ ] 姣忎釜浜虹‘璁ゆ槸鍚︽秹鍙婂崗璁€佺姸鎬併€侀敊璇爜銆佽〃缁撴瀯鍙樻洿銆?
+- [ ] 先冻结协议、对象、状态、错误码、表结构和边界。
+- [ ] 再打通主链路编排、执行、治理和交付。
+- [ ] 再由前端接上真实状态和真实结果承接。
+- [ ] 再做 P1 持续使用增强。
+- [ ] 最后再做 P2 / P3 增强与生态。
 
-### 10.2 姣忓懆寮€鍙戜腑
+### 8.2 不允许的顺序
 
-- [ ] 鏈夊璞″彉鏇村厛鏇存柊鐪熸簮锛屽啀鏇存柊瀹炵幇銆?
-- [ ] 鏈夎仈璋冮摼璺紭鍏堟媺閫氱湡瀹為摼璺紝涓嶅仛 UI 鍋囬摼璺浛浠ｃ€?
-- [ ] 鏈夐珮椋庨櫓鍔ㄤ綔蹇呴』琛ユ巿鏉冦€佸璁°€佹仮澶嶇偣璺緞銆?
-
-### 10.3 姣忓懆缁撴潫鍓?
-
-- [ ] 姣忎釜宸插畬鎴愪换鍔￠兘鍦ㄦ湰鏂囨。涓嬀閫夈€?
-- [ ] 姣忎釜宸插畬鎴愪换鍔￠兘鏈夊搴斾唬鐮佷綅缃拰鑱旇皟璇佹槑銆?
-- [ ] 鑻ユ柊澧炲崗璁?/ 鏁版嵁 / 鐘舵€?/ 杈圭晫锛屽繀椤诲悓姝ュ洖鍐?`docs/` 鐪熸簮銆?
+- [ ] 不允许前端先写完整页面再倒逼协议和对象。
+- [ ] 不允许 worker / plugin 直接输出临时 JSON 给前端长期消费。
+- [ ] 不允许 1号、2号、3号 各自维护一套状态模型。
+- [ ] 不允许 4号、5号 分别维护两套 schema 或两套错误码语义。
+- [ ] 不允许以“先演示”为理由绕过授权、审计、恢复点和正式交付出口。
 
 ---
 
-## 11. 褰撳墠闃舵涓€鍙ヨ瘽缁撹
+## 9. 里程碑与勾选标准
 
-褰撳墠椤圭洰鏈€閲嶈鐨勪簨涓嶆槸缁х画閾烘柊鍔熻兘锛岃€屾槸 **鍩轰簬宸茬粡瀛樺湪鐨勫崗璁€佸悗绔紪鎺掋€佸瓨鍌ㄤ笌妗岄潰澶氱獥鍙ｉ鏋讹紝鎶?P0 涓婚摼璺湡姝ｈ仈璋冮棴鐜紝鍐嶆湁鑺傚鍦版帹杩?P1锛屽彲鎸佺画浣跨敤涔嬪悗鍐嶅仛 P2/P3 鎵╁睍銆?*
+### 9.1 M0：统一项冻结
+
+- [ ] 目录、命名、核心对象、协议方法、错误码、数据主模型、主链路、跨平台抽象全部对齐，且 `packages/protocol`、Go runtime、前端类型层无未登记临时字段。
+
+### 9.2 M1：P0 主链路跑通
+
+- [ ] 三种主入口至少各完整跑通一次：文本选中、文件拖拽、语音输入。
+- [ ] 至少一种高风险动作跑通授权链，并能在安全摘要或任务详情看到授权 / 审计 / 恢复点结果。
+- [ ] 至少一种正式交付真实可见，且支持 `open_action` 或 artifact 打开动作。
+- [ ] 仪表盘能看到 `task / artifact / audit / recovery_point` 的最小结果，任务详情能看到 `delivery_result / security_summary / timeline` 的基础承接。
+- [x] 至少有一次记忆命中或记忆摘要写入。
+
+### 9.3 M2：P1 可持续使用
+
+- [ ] 任务巡检、镜子、安全详情、恢复查看、Trace/Eval、Token/费用和预算降级进入可用态，并有至少一个真实页面入口或联调录像证明可用。
+
+### 9.4 M3：P2 / P3 增强
+
+- [ ] 推荐增强、感知增强、视频总结、多模型、多插件、社区 Skills 等进入稳定迭代，并明确哪些属于后端底座、哪些属于前端承接。
+
+---
+
+## 10. 每周协作执行建议
+
+### 10.1 每周开始前
+
+- [ ] 每个人确认本周任务是否属于自己主责边界。
+- [ ] 每个人确认任务是否属于 P0 / P1 / P2 / P3 中的哪一层。
+- [ ] 每个人确认是否涉及协议、状态、错误码、表结构变更。
+
+### 10.2 每周开发中
+
+- [ ] 有对象变更先更新真源，再更新实现。
+- [ ] 有联调链路优先拉通真实链路，不做 UI 假链路替代。
+- [ ] 有高风险动作必须补授权、审计、恢复点路径。
+
+### 10.3 每周结束前
+
+- [ ] 每个已完成任务都在本文档中勾选。
+- [ ] 每个已完成任务都有对应代码位置和联调证明。
+- [ ] 若新增协议 / 数据 / 状态 / 边界，必须同步回写 `docs/` 真源。
+
+---
+
+## 11. 当前阶段一句话结论
+
+当前项目最重要的事不是继续铺新功能，而是 **基于已经存在的协议、后端编排、存储与桌面多窗口骨架，把 P0 主链路真正联调闭环，再有节奏地推进 P1，可持续使用之后再做 P2/P3 扩展。**
