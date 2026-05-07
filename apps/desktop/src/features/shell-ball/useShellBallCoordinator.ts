@@ -71,6 +71,7 @@ import {
   buildShellBallIntentCorrectionPlaceholder,
   formatShellBallIntentLabel,
 } from "./shellBallIntentCorrection";
+import { shouldFocusShellBallInlineInputBeforePrimaryClick } from "./shellBallPrimaryClick";
 
 type ShellBallCoordinatorInput = {
   visualState: ShellBallVisualState;
@@ -3813,6 +3814,15 @@ export function useShellBallCoordinator(input: ShellBallCoordinatorInput) {
         break;
       }
       case "primary_click":
+        if (shouldFocusShellBallInlineInputBeforePrimaryClick({
+          inputValue: snapshotRef.current.inputValue,
+          pendingFiles: snapshotRef.current.pendingFiles,
+        })) {
+          handlersRef.current.onRequestInputFocus();
+          revealBubbleRegion();
+          break;
+        }
+
         void handlePrimaryRecommendationClick();
         break;
     }

@@ -52,6 +52,7 @@ import { useDesktopOnboardingActions } from "@/features/onboarding/useDesktopOnb
 import { useDesktopOnboardingLoading } from "@/features/onboarding/useDesktopOnboardingLoading";
 import { useDesktopOnboardingSession } from "@/features/onboarding/useDesktopOnboardingSession";
 import { shouldShowShellBallDemoSwitcher } from "./shellBall.dev";
+import { shouldFocusShellBallInlineInputBeforePrimaryClick } from "./shellBallPrimaryClick";
 import { useShellBallStore } from "../../stores/shellBallStore";
 
 type ShellBallAppProps = {
@@ -963,8 +964,22 @@ export function ShellBallApp({ isDev = false }: ShellBallAppProps) {
       setClipboardPrompt(null);
     }
 
+    if (shouldFocusShellBallInlineInputBeforePrimaryClick({ inputValue, pendingFiles })) {
+      focusInlineInputField();
+      return;
+    }
+
     void handleCoordinatorPrimaryAction("primary_click");
-  }, [clipboardPrompt, handleCoordinatorClipboardPrompt, handleCoordinatorPrimaryAction, handleCoordinatorSelectedTextPrompt, selectionPrompt]);
+  }, [
+    clipboardPrompt,
+    focusInlineInputField,
+    handleCoordinatorClipboardPrompt,
+    handleCoordinatorPrimaryAction,
+    handleCoordinatorSelectedTextPrompt,
+    inputValue,
+    pendingFiles,
+    selectionPrompt,
+  ]);
 
   const handleDockAwareRegionEnter = useCallback(() => {
     setEdgeDockRevealed(true);
