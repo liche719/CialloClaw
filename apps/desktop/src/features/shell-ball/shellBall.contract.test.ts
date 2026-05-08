@@ -9800,6 +9800,19 @@ test("shell-ball file drops queue pending attachments instead of starting a task
   assert.match(interactionSource, /controllerRef\.current\?\.forceState\("hover_input", \{/);
 });
 
+test("shell-ball intent correction rejects new file drops instead of hiding them in the draft queue", () => {
+  const coordinatorSource = readFileSync(resolve(desktopRoot, "src/features/shell-ball/useShellBallCoordinator.ts"), "utf8");
+
+  assert.match(
+    coordinatorSource,
+    /function createShellBallIntentCorrectionAttachmentUnsupportedBubbleItem\(input: \{[\s\S]*New file drops are unavailable while intent confirmation is open\./s,
+  );
+  assert.match(
+    coordinatorSource,
+    /const activeIntentCorrection = intentCorrectionRef\.current;[\s\S]*if \(activeIntentCorrection !== null\) \{[\s\S]*createShellBallIntentCorrectionAttachmentUnsupportedBubbleItem\([\s\S]*taskId: activeIntentCorrection\.taskId,[\s\S]*revealBubbleRegion\(\);[\s\S]*return;[\s\S]*\}[\s\S]*handlersRef\.current\.onAppendPendingFiles\(normalizedPaths\);/s,
+  );
+});
+
 test("shell-ball task entry sources keep rpc failures visible and forward attachment descriptions", () => {
   const coordinatorSource = readFileSync(resolve(desktopRoot, "src/features/shell-ball/useShellBallCoordinator.ts"), "utf8");
   const interactionSource = readFileSync(resolve(desktopRoot, "src/features/shell-ball/useShellBallInteraction.ts"), "utf8");

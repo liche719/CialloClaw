@@ -1316,6 +1316,25 @@ function createShellBallIntentCorrectionUnsupportedBubbleItem(input: {
   });
 }
 
+// `agent.task.confirm` cannot formally attach new files yet, so correction-mode
+// file drops must fail loudly instead of leaking into the hidden draft queue.
+function createShellBallIntentCorrectionAttachmentUnsupportedBubbleItem(input: {
+  createdAt: string;
+  taskId: string;
+  turnIndex?: number;
+  turnPhase?: number;
+}) {
+  return createShellBallTextBubbleItem({
+    role: "agent",
+    text: "New file drops are unavailable while intent confirmation is open. Confirm or cancel this task first, then attach files.",
+    bubbleType: "status",
+    createdAt: input.createdAt,
+    taskId: input.taskId,
+    turnIndex: input.turnIndex,
+    turnPhase: input.turnPhase,
+  });
+}
+
 function createShellBallApprovalErrorBubbleItem(input: {
   createdAt: string;
   error: unknown;
@@ -2254,8 +2273,25 @@ export function useShellBallCoordinator(input: ShellBallCoordinatorInput) {
       return;
     }
 
+    const activeIntentCorrection = intentCorrectionRef.current;
+    if (activeIntentCorrection !== null) {
+      setBubbleItems((currentItems) =>
+        sortShellBallBubbleItemsByTimestamp([
+          ...currentItems,
+          createShellBallIntentCorrectionAttachmentUnsupportedBubbleItem({
+            createdAt: new Date().toISOString(),
+            taskId: activeIntentCorrection.taskId,
+            turnIndex: allocateBubbleTurnIndex(),
+            turnPhase: 0,
+          }),
+        ]),
+      );
+      revealBubbleRegion();
+      return;
+    }
+
     handlersRef.current.onAppendPendingFiles(normalizedPaths);
-  }, []);
+  }, [allocateBubbleTurnIndex, revealBubbleRegion]);
 
   /**
    * Selected-text intake should enter the same formal task pipeline as other
