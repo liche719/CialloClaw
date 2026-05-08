@@ -9035,7 +9035,7 @@ test("shell-ball mascot hotspot policy keeps primary click available outside voi
   );
 });
 
-test("shell-ball mascot hotspot policy opens dashboard only from resting double click", () => {
+test("shell-ball mascot hotspot policy keeps dashboard double click available during intent confirmation", () => {
   assert.equal(
     getShellBallMascotHotspotGestureAction({
       visualState: "idle",
@@ -9048,6 +9048,15 @@ test("shell-ball mascot hotspot policy opens dashboard only from resting double 
   assert.equal(
     getShellBallMascotHotspotGestureAction({
       visualState: "hover_input",
+      gesture: "double_click",
+      suppressed: false,
+    }),
+    "double_click",
+  );
+
+  assert.equal(
+    getShellBallMascotHotspotGestureAction({
+      visualState: "confirming_intent",
       gesture: "double_click",
       suppressed: false,
     }),
@@ -10003,7 +10012,7 @@ test("shell-ball input bar restores textarea focus after attach and send actions
   assert.match(inputBarSource, /onSubmit\(\);\s*restoreTextareaFocus\(\);/);
 });
 
-test("shell-ball app dashboard-open gate stays blocked for consumed or non-resting double clicks", () => {
+test("shell-ball app dashboard-open gate stays blocked only for consumed or voice-state double clicks", () => {
   assert.equal(
     getShellBallDashboardOpenGesturePolicy({ gesture: "double_click", state: "idle", interactionConsumed: false }),
     true,
@@ -10013,7 +10022,15 @@ test("shell-ball app dashboard-open gate stays blocked for consumed or non-resti
     true,
   );
   assert.equal(
+    getShellBallDashboardOpenGesturePolicy({ gesture: "double_click", state: "confirming_intent", interactionConsumed: false }),
+    true,
+  );
+  assert.equal(
     getShellBallDashboardOpenGesturePolicy({ gesture: "double_click", state: "hover_input", interactionConsumed: true }),
+    false,
+  );
+  assert.equal(
+    getShellBallDashboardOpenGesturePolicy({ gesture: "double_click", state: "confirming_intent", interactionConsumed: true }),
     false,
   );
   assert.equal(
