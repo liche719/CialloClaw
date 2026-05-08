@@ -153,12 +153,13 @@ export function isShellBallClipboardPromptActive(
 export function resolveShellBallInlineInputMode(input: {
   shouldRenderInlineInput: boolean;
   snapshotInputBarMode: ShellBallInputBarMode;
+  forceReadonly?: boolean;
 }): ShellBallInputBarMode {
   if (!input.shouldRenderInlineInput) {
     return "hidden";
   }
 
-  if (input.snapshotInputBarMode === "readonly") {
+  if (input.snapshotInputBarMode === "readonly" || input.forceReadonly === true) {
     return "readonly";
   }
 
@@ -324,7 +325,7 @@ export function ShellBallApp({ isDev = false }: ShellBallAppProps) {
     handleRecommendationAccept: handleCoordinatorRecommendationAccept,
     handleRecommendationIgnore: handleCoordinatorRecommendationIgnore,
     handleConfirmIntentBubble: handleCoordinatorConfirmIntentBubble,
-    handleRefineIntentBubble: handleCoordinatorRefineIntentBubble,
+    handleCancelIntentBubble: handleCoordinatorCancelIntentBubble,
     handleCancelIntentCorrection: handleCoordinatorCancelIntentCorrection,
     handleBubbleHoverChange: handleCoordinatorBubbleHoverChange,
     handleInputHoverChange: handleCoordinatorInputHoverChange,
@@ -358,10 +359,15 @@ export function ShellBallApp({ isDev = false }: ShellBallAppProps) {
     onRequestInputFocus: () => focusInlineInputField(),
   });
   const shouldRenderInlineInput = snapshot.visibility.input;
-  const inlineInputMode = resolveShellBallInlineInputMode({
+  const baseInlineInputMode = resolveShellBallInlineInputMode({
     shouldRenderInlineInput,
     snapshotInputBarMode: snapshot.inputBarMode,
+    forceReadonly: false,
   });
+  // Intent confirmation temporarily borrows the same inline composer so the
+  // user can either leave it empty and confirm, or type a natural-language
+  // correction without switching to a different input surface.
+  const inlineInputMode = intentCorrection?.submitting ? "readonly" : baseInlineInputMode;
   const visibleBubbleItems = getShellBallVisibleBubbleItems(snapshot.bubbleItems);
   const {
     ballDockSettling,
@@ -1033,8 +1039,8 @@ export function ShellBallApp({ isDev = false }: ShellBallAppProps) {
                   onDenyApprovalBubble={(bubbleId) => {
                     handleCoordinatorBubbleAction({ action: "deny_approval", bubbleId, source: "bubble" });
                   }}
+                  onCancelIntentBubble={handleCoordinatorCancelIntentBubble}
                   onConfirmIntentBubble={handleCoordinatorConfirmIntentBubble}
-                  onRefineIntentBubble={handleCoordinatorRefineIntentBubble}
                   onAcceptErrorSignalBubble={handleCoordinatorErrorSignalAccept}
                   onIgnoreErrorSignalBubble={handleCoordinatorErrorSignalIgnore}
                   onAcceptRecommendationBubble={handleCoordinatorRecommendationAccept}
@@ -1070,7 +1076,7 @@ export function ShellBallApp({ isDev = false }: ShellBallAppProps) {
             hasPendingFiles={intentCorrection === null && pendingFiles.length > 0}
             label={intentCorrection?.label}
             placeholder={intentCorrection?.placeholder}
-            auxiliaryAction={intentCorrection === null ? "attach" : "cancel"}
+            auxiliaryAction={intentCorrection === null ? "attach" : "clear"}
             onValueChange={setInputValue}
             onAttachFile={handleInlineAttachFile}
             onCancel={handleCoordinatorCancelIntentCorrection}

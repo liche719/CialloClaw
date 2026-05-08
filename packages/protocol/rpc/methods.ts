@@ -277,6 +277,7 @@ export interface AgentTaskConfirmParams {
   task_id: string;
   confirmed: boolean;
   corrected_intent?: IntentPayload;
+  correction_text?: string;
 }
 
 // AgentTaskConfirmResult 定义当前模块的接口约束。

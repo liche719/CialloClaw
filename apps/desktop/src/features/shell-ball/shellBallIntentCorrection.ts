@@ -26,6 +26,17 @@ export function formatShellBallIntentLabel(intentName: string): string {
 }
 
 /**
+ * Builds the temporary input label used while shell-ball borrows the inline
+ * draft field for intent confirmation follow-up.
+ *
+ * @param currentIntentLabel Current inferred intent label shown in the bubble.
+ * @returns A compact label that makes the active intent explicit.
+ */
+export function buildShellBallIntentCorrectionLabel(currentIntentLabel: string): string {
+  return `Intent: ${currentIntentLabel}`;
+}
+
+/**
  * Builds the temporary input placeholder used while the shell-ball borrows the
  * inline draft field for natural-language intent correction.
  *
@@ -33,5 +44,5 @@ export function formatShellBallIntentLabel(intentName: string): string {
  * @returns Placeholder text for the borrowed inline input.
  */
 export function buildShellBallIntentCorrectionPlaceholder(currentIntentLabel: string): string {
-  return `Describe the intent you want instead of ${currentIntentLabel}.`;
+  return `Leave this empty to continue with ${currentIntentLabel}, or describe a different intent.`;
 }

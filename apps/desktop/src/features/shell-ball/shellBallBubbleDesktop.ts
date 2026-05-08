@@ -59,6 +59,7 @@ export type ShellBallBubbleIntentConfirmState = {
   status?: "idle" | "submitting";
   sessionId?: string;
   pageContext?: PageContext;
+  files?: string[];
 };
 
 export type ShellBallBubbleDesktopState = {
@@ -123,6 +124,7 @@ function cloneShellBallBubbleIntentConfirmState(
   return {
     ...state,
     ...(state.pageContext ? { pageContext: { ...state.pageContext } } : {}),
+    ...(state.files ? { files: [...state.files] } : {}),
   };
 }
 

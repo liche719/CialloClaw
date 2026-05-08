@@ -7,8 +7,8 @@ type ShellBallBubbleMessageProps = {
   onPin?: (bubbleId: string) => void;
   onAllowApproval?: (bubbleId: string) => void;
   onDenyApproval?: (bubbleId: string) => void;
+  onCancelIntent?: (taskId: string) => void;
   onConfirmIntent?: (taskId: string) => void;
-  onRefineIntent?: (taskId: string) => void;
   onAcceptErrorSignal?: (bubbleId: string) => void;
   onIgnoreErrorSignal?: (bubbleId: string) => void;
   onAcceptRecommendation?: (bubbleId: string) => void;
@@ -21,8 +21,8 @@ export function ShellBallBubbleMessage({
   onPin,
   onAllowApproval,
   onDenyApproval,
+  onCancelIntent,
   onConfirmIntent,
-  onRefineIntent,
   onAcceptErrorSignal,
   onIgnoreErrorSignal,
   onAcceptRecommendation,
@@ -48,7 +48,9 @@ export function ShellBallBubbleMessage({
     inlineRecommendation !== undefined && onAcceptRecommendation !== undefined && onIgnoreRecommendation !== undefined;
   const isIntentConfirmBubble = item.role === "agent" && item.bubble.type === "intent_confirm" && taskId !== "";
   const shouldShowIntentConfirmActions =
-    isIntentConfirmBubble && onConfirmIntent !== undefined && onRefineIntent !== undefined;
+    isIntentConfirmBubble && (onCancelIntent !== undefined || onConfirmIntent !== undefined);
+  const shouldShowIntentCancelAction =
+    isIntentConfirmBubble && onCancelIntent !== undefined;
   const shouldShowBubbleControls =
     !shouldShowInlineApprovalActions
     && !shouldShowInlineErrorSignalActions
@@ -199,19 +201,21 @@ export function ShellBallBubbleMessage({
           </div>
         ) : shouldShowIntentConfirmActions ? (
           <div className="shell-ball-bubble-message__recommendation-actions">
-            <button
-              type="button"
-              className="shell-ball-bubble-message__recommendation-action shell-ball-bubble-message__recommendation-action--ignore"
-              data-bubble-action="refine_intent"
-              data-bubble-id={bubbleId}
-              aria-label="Modify intent"
-              disabled={intentConfirmBusy}
-              onClick={() => {
-                onRefineIntent?.(taskId);
-              }}
-            >
-              Modify intent
-            </button>
+            {shouldShowIntentCancelAction ? (
+              <button
+                type="button"
+                className="shell-ball-bubble-message__recommendation-action shell-ball-bubble-message__recommendation-action--ignore"
+                data-bubble-action="cancel_intent"
+                data-bubble-id={bubbleId}
+                aria-label="Cancel intent confirmation"
+                disabled={intentConfirmBusy}
+                onClick={() => {
+                  onCancelIntent?.(taskId);
+                }}
+              >
+                Cancel
+              </button>
+            ) : null}
             <button
               type="button"
               className="shell-ball-bubble-message__approval-action shell-ball-bubble-message__approval-action--allow"

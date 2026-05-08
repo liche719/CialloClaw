@@ -10,8 +10,8 @@ type ShellBallBubbleZoneProps = {
   onPinBubble?: (bubbleId: string) => void;
   onAllowApprovalBubble?: (bubbleId: string) => void;
   onDenyApprovalBubble?: (bubbleId: string) => void;
+  onCancelIntentBubble?: (taskId: string) => void;
   onConfirmIntentBubble?: (taskId: string) => void;
-  onRefineIntentBubble?: (taskId: string) => void;
   onAcceptErrorSignalBubble?: (bubbleId: string) => void;
   onIgnoreErrorSignalBubble?: (bubbleId: string) => void;
   onAcceptRecommendationBubble?: (bubbleId: string) => void;
@@ -25,8 +25,8 @@ export function ShellBallBubbleZone({
   onPinBubble,
   onAllowApprovalBubble,
   onDenyApprovalBubble,
+  onCancelIntentBubble,
   onConfirmIntentBubble,
-  onRefineIntentBubble,
   onAcceptErrorSignalBubble,
   onIgnoreErrorSignalBubble,
   onAcceptRecommendationBubble,
@@ -104,8 +104,8 @@ export function ShellBallBubbleZone({
               onPin={onPinBubble}
               onAllowApproval={onAllowApprovalBubble}
               onDenyApproval={onDenyApprovalBubble}
+              onCancelIntent={onCancelIntentBubble}
               onConfirmIntent={onConfirmIntentBubble}
-              onRefineIntent={onRefineIntentBubble}
               onAcceptErrorSignal={onAcceptErrorSignalBubble}
               onIgnoreErrorSignal={onIgnoreErrorSignalBubble}
               onAcceptRecommendation={onAcceptRecommendationBubble}

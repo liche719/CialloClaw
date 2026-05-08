@@ -13,7 +13,7 @@ type ShellBallInputBarProps = {
   focusToken?: number;
   label?: string;
   placeholder?: string;
-  auxiliaryAction?: "attach" | "cancel";
+  auxiliaryAction?: "attach" | "cancel" | "clear";
   onValueChange: (value: string) => void;
   onAttachFile: () => void;
   onCancel?: () => void;
@@ -62,7 +62,11 @@ export function ShellBallInputBar({
   const isVoice = mode === "voice";
   const buttonsDisabled = isHidden || isReadonly || isVoice;
   const submitDisabled = !isInteractive || (trimmedValue === "" && !hasPendingFiles);
-  const auxiliaryActionLabel = auxiliaryAction === "cancel" ? "Cancel intent correction" : "Attach file";
+  const auxiliaryActionLabel = auxiliaryAction === "cancel"
+    ? "Cancel intent correction"
+    : auxiliaryAction === "clear"
+      ? "Clear intent draft"
+      : "Attach file";
 
   useLayoutEffect(() => {
     const field = inputRef.current;
@@ -207,7 +211,7 @@ export function ShellBallInputBar({
             event.preventDefault();
           }}
           onClick={() => {
-            if (auxiliaryAction === "cancel") {
+            if (auxiliaryAction === "cancel" || auxiliaryAction === "clear") {
               onCancel?.();
               return;
             }
@@ -218,7 +222,7 @@ export function ShellBallInputBar({
           disabled={buttonsDisabled}
           aria-label={auxiliaryActionLabel}
         >
-          {auxiliaryAction === "cancel"
+          {auxiliaryAction === "cancel" || auxiliaryAction === "clear"
             ? <X className="shell-ball-uiverse-action-icon" />
             : <Paperclip className="shell-ball-uiverse-action-icon" />}
         </button>

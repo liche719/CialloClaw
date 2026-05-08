@@ -570,7 +570,7 @@ Notification 只负责“状态变化推送”，不承载复杂业务命令。
 
 - **悬浮球单击 / 双击 / 长按 / 上滑 / 下滑 / 悬停** 属于前端交互动作，本地先进入前端状态机，再映射到 `agent.input.submit`、`agent.task.start` 或本地 UI 行为。
 - **文本选中承接、文件拖拽承接、错误信息承接** 统一收敛到 `agent.task.start`。
-- **意图确认与纠偏**：显式确认仍使用 `agent.task.confirm`；若同一 `session` 内只有一个 `waiting_input / confirming_intent` 任务，用户也可通过 `agent.input.submit` 以自然语言补充或修正说明，继续挂回该任务。
+- **意图确认与纠偏**：显式确认与同任务自然语言纠偏统一使用 `agent.task.confirm`；前端可以借用同一个输入框承接纠偏文本，但不得把这类输入改走新的 `agent.input.submit` 任务。
 - 气泡置顶 / 删除 / 恢复：优先作为前端局部能力，必要时再引出设置或历史管理接口
 - **主动推荐与反馈** 统一使用 `agent.recommendation.get` 和 `agent.recommendation.feedback.submit`。
 - **屏幕截图、剪贴板、鼠标停留等场景感知信号** 统一使用 `agent.screen.analyze`，用于判断是否刷新推荐，不直接替代 `agent.task.start` 创建正式任务。
@@ -647,7 +647,7 @@ Notification 只负责“状态变化推送”，不承载复杂业务命令。
 - 当客户端省略 `session_id` 时，后端应负责选择或创建隐藏协作 session，并把最终使用的 `session_id` 写回返回的 `task` 对象，而不是要求前端自行猜测生命周期。
 - 当普通文本被判定为无任务锚点的纯社交 / 闲聊输入时，后端可返回 `data.task = null`、`data.delivery_result = null` 与 `task_id` 为空的 `bubble_message`；前端只能把它当作轻量承接反馈，不得写入正式任务链、任务详情或正式交付出口。
 - 若现有 task 已处于 `waiting_auth`、`blocked` 或 `paused`，后端不得通过隐式 follow-up 直接改写原 task 的后续执行语义；此时应新开 task 或等待显式恢复/授权链路处理。
-- 若同一 `session` 内只有一个 `waiting_input / confirming_intent` 任务，普通文本补充可续接到该任务；`options.confirm_required = true` 只表示本次补充后仍需确认，不应把普通文本补充机械拆成新 task。
+- 若同一 `session` 内只有一个 `waiting_input` 任务，普通文本补充可续接到该任务；若目标任务处于 `confirming_intent`，自然语言纠偏应继续走 `agent.task.confirm`，而不是把这类补充改成新的 `agent.input.submit` 任务。
 - 文件、选区、错误等结构化补充证据若要续接旧 task，仍必须存在共享页面 / 窗口 / App 锚点、共享选区 / 报错 / 附件血缘，或其他能证明属于旧任务的 lineage。
 
 ### agent.input.submit 入参示例
@@ -940,14 +940,14 @@ Notification 只负责“状态变化推送”，不承载复杂业务命令。
   - 采纳确认结果
   - 更新任务意图
   - 推进到正式执行阶段
-- **入参**：任务 ID、是否确认、修正后的意图
+- **入参**：任务 ID、是否确认、结构化修正意图或自然语言纠偏文本
 - **出参**：更新后的任务对象、状态气泡
 
 补充约束：
 
-- `confirmed = true` 时，表示用户确认系统当前猜测的意图正确，此时 `corrected_content` 可省略；若传入也应被忽略，不得覆盖当前意图。
-- `confirmed = false` 时，若调用方传入完整的 `corrected_content`，后端以该对象覆盖任务当前意图后再推进执行。
-- `confirmed = false` 且未传入 `corrected_content` 时，后端不得直接取消任务；应保留任务在 `corrected_content`，并返回要求用户重新说明目标或补充修正意图的状态气泡。
+- `confirmed = true` 时，表示用户确认系统当前猜测的意图正确，此时 `corrected_intent` 与 `correction_text` 都可省略；若传入也应被忽略，不得覆盖当前意图。
+- `confirmed = false` 时，调用方可传入完整的 `corrected_intent`，也可传入自然语言 `correction_text`；后端应基于该修正结果更新当前任务的候选意图，并决定是继续停留在 `confirming_intent` 还是推进执行。
+- `confirmed = false` 且未传入 `corrected_intent` / `correction_text` 时，后端不得直接取消任务；应保留任务在 `confirming_intent`，并返回要求用户重新说明目标或补充修正意图的状态气泡。
 - 本接口只处理“意图确认 / 纠偏”这一承接阶段，不替代 `agent.task.control` 的暂停、继续、取消、重启控制语义。
 
 ### agent.task.confirm 入参说明
@@ -958,7 +958,8 @@ Notification 只负责“状态变化推送”，不承载复杂业务命令。
 | `request_meta.client_time`   | 前端发起时间         |
 | `task_id`                    | 目标任务 ID          |
 | `confirmed`                  | 是否确认系统猜测正确 |
-| `corrected_content`      | 修正后的用户想法     |
+| `corrected_intent`           | 修正后的结构化意图   |
+| `correction_text`            | 修正后的自然语言说明 |
 
 ### agent.task.confirm 入参示例
 
@@ -974,7 +975,7 @@ Notification 只负责“状态变化推送”，不承载复杂业务命令。
     },
     "task_id": "task_101",
     "confirmed": false,
-    "corrected_content": "修正后的用户想法"
+    "correction_text": "请改成总结这份周报的风险点"
     }
   }
 }
@@ -986,7 +987,7 @@ Notification 只负责“状态变化推送”，不承载复杂业务命令。
 | --------------------- | ---------------- |
 | `data.task.task_id`   | 任务 ID          |
 | `data.task.status`    | 更新后的任务状态 |
-| `data.task.corrected_content`    | 生效后的任务意图 |
+| `data.task.intent`         | 生效后的任务意图 |
 | `data.task.current_step` | 当前步骤      |
 | `data.bubble_message` | 状态提示气泡     |
 
@@ -1001,7 +1002,12 @@ Notification 只负责“状态变化推送”，不承载复杂业务命令。
       "task": {
         "task_id": "task_101",
         "status": "processing",
-        "corrected_content": "修正后的用户想法",
+        "intent": {
+          "name": "summarize",
+          "arguments": {
+            "focus": "risk_points"
+          }
+        },
         "current_step": "generate_output"
       },
       "bubble_message": {

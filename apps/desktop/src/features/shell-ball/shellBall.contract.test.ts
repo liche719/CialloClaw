@@ -107,10 +107,12 @@ import {
   applyShellBallBubbleAction,
   createShellBallAgentBubbleItem,
   createShellBallRuntimeObservationReply,
+  replaceShellBallIntentConfirmBubble,
   shouldAutoOpenShellBallDeliveryResult,
   sortShellBallBubbleItemsByTimestamp,
 } from "./useShellBallCoordinator";
 import {
+  buildShellBallIntentCorrectionLabel,
   buildShellBallIntentCorrectionPlaceholder,
   formatShellBallIntentLabel,
 } from "./shellBallIntentCorrection";
@@ -4862,9 +4864,9 @@ test("shell-ball input bar can borrow the inline draft field for intent correcti
       mode: "interactive",
       voicePreview: null,
       value: "translate this to japanese",
-      label: "Modify intent",
-      placeholder: "Describe the intent you want instead of Rewrite.",
-      auxiliaryAction: "cancel",
+      label: "Intent: Rewrite",
+      placeholder: "Leave this empty to continue with Rewrite, or describe a different intent.",
+      auxiliaryAction: "clear",
       onValueChange: () => {},
       onAttachFile: () => {},
       onCancel: () => {},
@@ -4873,9 +4875,9 @@ test("shell-ball input bar can borrow the inline draft field for intent correcti
     }),
   );
 
-  assert.match(markup, />Modify intent</);
-  assert.match(markup, /Describe the intent you want instead of Rewrite\./);
-  assert.match(markup, /aria-label="Cancel intent correction"/);
+  assert.match(markup, />Intent: Rewrite</);
+  assert.match(markup, /Leave this empty to continue with Rewrite, or describe a different intent\./);
+  assert.match(markup, /aria-label="Clear intent draft"/);
 });
 
 test("shell-ball mascot supports passive rendering outside the floating ball host", () => {
@@ -5711,7 +5713,7 @@ test("shell-ball pending-approval bubbles render inline allow and deny controls"
   assert.doesNotMatch(markup, /data-bubble-action="delete"/);
 });
 
-test("shell-ball intent confirmation bubbles render the intent chip plus inline modify and OK actions", () => {
+test("shell-ball intent confirmation bubbles render cancel and OK actions while the inline input handles correction text", () => {
   const markup = renderToStaticMarkup(
     createElement(ShellBallBubbleZone, {
       visualState: "confirming_intent",
@@ -5736,19 +5738,21 @@ test("shell-ball intent confirmation bubbles render the intent chip plus inline 
           },
         },
       ] satisfies ShellBallBubbleItem[],
+      onCancelIntentBubble() {},
       onConfirmIntentBubble() {},
-      onRefineIntentBubble() {},
       onDeleteBubble() {},
       onPinBubble() {},
     }),
   );
 
+  assert.equal(markup.match(/data-bubble-action="cancel_intent"/g)?.length, 1);
   assert.equal(markup.match(/data-bubble-action="confirm_intent"/g)?.length, 1);
-  assert.equal(markup.match(/data-bubble-action="refine_intent"/g)?.length, 1);
   assert.match(markup, />Intent</);
   assert.match(markup, />Rewrite</);
-  assert.match(markup, />Modify intent</);
+  assert.match(markup, />Cancel</);
   assert.match(markup, />OK</);
+  assert.doesNotMatch(markup, /data-bubble-action="refine_intent"/);
+  assert.doesNotMatch(markup, />Modify intent</);
   assert.doesNotMatch(markup, /data-bubble-action="pin"/);
   assert.doesNotMatch(markup, /data-bubble-action="delete"/);
 });
@@ -5779,15 +5783,16 @@ test("shell-ball intent confirmation bubbles disable inline actions while correc
           },
         },
       ] satisfies ShellBallBubbleItem[],
+      onCancelIntentBubble() {},
       onConfirmIntentBubble() {},
-      onRefineIntentBubble() {},
       onDeleteBubble() {},
       onPinBubble() {},
     }),
   );
 
+  assert.equal(markup.match(/data-bubble-action="cancel_intent"/g)?.length, 1);
   assert.equal(markup.match(/data-bubble-action="confirm_intent"/g)?.length, 1);
-  assert.equal(markup.match(/data-bubble-action="refine_intent"/g)?.length, 1);
+  assert.doesNotMatch(markup, /data-bubble-action="refine_intent"/);
   assert.equal(markup.match(/disabled=""/g)?.length, 2);
 });
 
@@ -5951,6 +5956,7 @@ test("shell-ball agent intent confirmation bubbles preserve the inferred intent 
   assert.deepEqual(createdItem.desktop.intentConfirm, {
     intentName: "translate",
     intentLabel: "Translate",
+    status: "idle",
     sessionId: "sess-intent-bubble",
     pageContext: {
       app_name: "Chrome",
@@ -5960,11 +5966,89 @@ test("shell-ball agent intent confirmation bubbles preserve the inferred intent 
   });
 });
 
+test("shell-ball intent confirm replacement restores the latest confirmation bubble for a task", () => {
+  const staleIntentConfirmBubble: ShellBallBubbleItem = {
+    bubble: {
+      bubble_id: "bubble-intent-stale",
+      task_id: "task-intent-replace",
+      type: "intent_confirm",
+      text: "Should I summarize the previous page?",
+      pinned: false,
+      hidden: true,
+      created_at: "2026-05-05T10:10:30.000Z",
+    },
+    role: "agent",
+    desktop: {
+      lifecycleState: "visible",
+      intentConfirm: {
+        intentName: "summarize",
+        intentLabel: "Summarize",
+        status: "submitting",
+        files: ["C:\\workspace\\old.txt"],
+      },
+    },
+  };
+  const unrelatedStatusBubble: ShellBallBubbleItem = {
+    bubble: {
+      bubble_id: "bubble-status-keep",
+      task_id: "task-status-keep",
+      type: "status",
+      text: "Keep me",
+      pinned: false,
+      hidden: false,
+      created_at: "2026-05-05T10:10:20.000Z",
+    },
+    role: "agent",
+    desktop: {
+      lifecycleState: "visible",
+    },
+  };
+  const latestIntentConfirmBubble = createShellBallAgentBubbleItem(
+    {
+      task: {
+        task_id: "task-intent-replace",
+        session_id: "sess-intent-replace",
+        intent: {
+          name: "translate",
+          arguments: {
+            target_language: "Japanese",
+          },
+        },
+      },
+      bubble_message: {
+        bubble_id: "bubble-intent-latest",
+        task_id: "task-intent-replace",
+        type: "intent_confirm",
+        text: "Should I translate this to Japanese instead?",
+        pinned: false,
+        hidden: false,
+        created_at: "2026-05-05T10:10:40.000Z",
+      },
+      delivery_result: null,
+    } as any,
+    "2026-05-05T10:10:45.000Z",
+  ) as ShellBallBubbleItem;
+
+  const replacedItems = replaceShellBallIntentConfirmBubble(
+    [staleIntentConfirmBubble, unrelatedStatusBubble],
+    "task-intent-replace",
+    latestIntentConfirmBubble,
+  );
+
+  assert.equal(replacedItems.filter((item) => item.bubble.task_id === "task-intent-replace" && item.bubble.type === "intent_confirm").length, 1);
+  assert.equal(replacedItems[1]?.bubble.bubble_id, "bubble-intent-latest");
+  assert.equal(replacedItems[1]?.bubble.hidden, false);
+  assert.equal(replacedItems[1]?.bubble.text, "Should I translate this to Japanese instead?");
+  assert.deepEqual(replacedItems[1]?.desktop.intentConfirm?.intentName, "translate");
+  assert.equal(replacedItems[0]?.bubble.bubble_id, "bubble-status-keep");
+});
+
 test("shell-ball intent correction helpers keep the borrowed-input copy readable", () => {
   assert.equal(formatShellBallIntentLabel("write_file"), "Write Document");
+  assert.equal(buildShellBallIntentCorrectionLabel("Rewrite"), "Intent: Rewrite");
   assert.equal(
     buildShellBallIntentCorrectionPlaceholder("Rewrite"),
-    "Describe the intent you want instead of Rewrite.",
+    "Leave this empty to continue with Rewrite, or describe a different intent.",
   );
 });
 
@@ -8536,55 +8620,129 @@ test("shell-ball approval bubble actions stay on the formal security respond pat
   assert.match(coordinatorSource, /createShellBallApprovalPendingBubbleItem\(\{/);
 });
 
-test("shell-ball confirm buttons stay on the formal confirm path while borrowed intent edits reuse input continuation", () => {
+test("shell-ball intent correction prefers formal confirmTask correction_text and keeps unsupported backends on the original confirmation task", () => {
   const appSource = readFileSync(resolve(desktopRoot, "src/features/shell-ball/ShellBallApp.tsx"), "utf8");
   const coordinatorSource = readFileSync(resolve(desktopRoot, "src/features/shell-ball/useShellBallCoordinator.ts"), "utf8");
+  const bubbleDesktopSource = readFileSync(resolve(desktopRoot, "src/features/shell-ball/shellBallBubbleDesktop.ts"), "utf8");
   const bubbleMessageSource = readFileSync(
     resolve(desktopRoot, "src/features/shell-ball/components/ShellBallBubbleMessage.tsx"),
     "utf8",
   );
   const inputBarSource = readFileSync(resolve(desktopRoot, "src/features/shell-ball/components/ShellBallInputBar.tsx"), "utf8");
-  const correctionBranchMatch = coordinatorSource.match(/if \(activeIntentCorrection !== null\) \{([\s\S]*?)\n\s*break;\n\s*\}/);
-  assert.ok(correctionBranchMatch);
-  const correctionBranchSource = correctionBranchMatch[1] ?? "";
-  const correctionSubmitPrefix = correctionBranchSource.split("const result = await submitTextInput({", 1)[0] ?? "";
+  const correctionBranchStartToken = "if (activeIntentCorrection !== null) {";
+  const correctionBranchEndToken = "\n        if (shouldHandleShellBallWindowCommand({ text: submittedText, files: submittedFiles })) {";
+  const correctionBranchStartIndex = coordinatorSource.indexOf(correctionBranchStartToken);
+  const correctionBranchEndIndex = coordinatorSource.indexOf(correctionBranchEndToken, correctionBranchStartIndex);
+  assert.notEqual(correctionBranchStartIndex, -1);
+  assert.notEqual(correctionBranchEndIndex, -1);
+  const correctionBranchSource = coordinatorSource.slice(correctionBranchStartIndex, correctionBranchEndIndex);
 
+  assert.match(appSource, /onCancelIntentBubble=\{handleCoordinatorCancelIntentBubble\}/);
   assert.match(appSource, /onConfirmIntentBubble=\{handleCoordinatorConfirmIntentBubble\}/);
-  assert.match(appSource, /onRefineIntentBubble=\{handleCoordinatorRefineIntentBubble\}/);
-  assert.match(appSource, /auxiliaryAction=\{intentCorrection === null \? "attach" : "cancel"\}/);
+  assert.match(appSource, /forceReadonly: false,/);
+  assert.match(appSource, /auxiliaryAction=\{intentCorrection === null \? "attach" : "clear"\}/);
   assert.match(appSource, /label=\{intentCorrection\?\.label\}/);
   assert.match(appSource, /placeholder=\{intentCorrection\?\.placeholder\}/);
+  assert.match(bubbleMessageSource, /data-bubble-action="cancel_intent"/);
   assert.match(bubbleMessageSource, /data-bubble-action="confirm_intent"/);
-  assert.match(bubbleMessageSource, /data-bubble-action="refine_intent"/);
+  assert.match(bubbleMessageSource, /onCancelIntent\?\.\(taskId\)/);
   assert.match(bubbleMessageSource, /onConfirmIntent\?\.\(taskId\)/);
-  assert.match(bubbleMessageSource, /onRefineIntent\?\.\(taskId\)/);
+  assert.match(bubbleMessageSource, /const shouldShowIntentCancelAction =/);
   assert.match(inputBarSource, /auxiliaryAction = "attach"/);
   assert.match(inputBarSource, /aria-label=\{auxiliaryActionLabel\}/);
+  assert.match(inputBarSource, /auxiliaryAction === "clear"/);
   assert.match(coordinatorSource, /getCurrentWindow\(\)\.emit\(shellBallWindowSyncEvents\.intentDecision,/);
+  assert.match(coordinatorSource, /decision: "cancel"/);
   assert.match(coordinatorSource, /decision: "confirm"/);
-  assert.match(coordinatorSource, /const result = await submitTextInput\(\{/);
-  assert.match(coordinatorSource, /sessionId: activeIntentCorrection\.sessionId,/);
-  assert.match(coordinatorSource, /disableSessionFallback: true,/);
-  assert.match(coordinatorSource, /pageContext: activeIntentCorrection\.pageContext,/);
-  assert.match(coordinatorSource, /disableForegroundContextEnrichment: true,/);
+  assert.match(coordinatorSource, /const shellBallTaskFilesRef = useRef\(new Map<string, string\[\]>\(\)\);/);
+  assert.match(bubbleDesktopSource, /files\?: string\[\];/);
+  assert.match(coordinatorSource, /function getLatestVisibleShellBallIntentConfirmBubble\(items: ShellBallBubbleItem\[\]\)/);
+  assert.match(coordinatorSource, /const intentBubble = getLatestVisibleShellBallIntentConfirmBubble\(bubbleItemsRef\.current\);/);
+  assert.match(coordinatorSource, /savedInputValueOverride: snapshotRef\.current\.inputValue,/);
+  assert.match(
+    coordinatorSource,
+    /const rememberedTaskFiles = normalizeShellBallTaskFiles\(activeIntentCorrection\.files\)\s*\?\?\s*normalizeShellBallTaskFiles\(shellBallTaskFilesRef\.current\.get\(activeIntentCorrection\.taskId\)\)\s*\?\?\s*\[\];/s,
+  );
+  assert.match(
+    coordinatorSource,
+    /const correctionResult = await rpcMethods\.confirmTask\(\{\s*confirmed: false,\s*correction_text: submittedText,\s*request_meta: createShellBallRequestMeta\(\),\s*task_id: activeIntentCorrection\.taskId,\s*\}\);/s,
+  );
+  assert.match(coordinatorSource, /if \(canApplyShellBallIntentCorrectionConfirmResult\(\{/);
+  assert.match(coordinatorSource, /syncShellBallVisualStateFromTaskStatus\(resultTask\.status\);/);
+  assert.match(
+    coordinatorSource,
+    /const withoutPendingItems = replaceShellBallPendingBubble\(\s*nextItems,\s*pendingAgentBubbleItem\.bubble\.bubble_id,\s*\);/s,
+  );
+  assert.match(
+    coordinatorSource,
+    /const replacedItems = replaceShellBallIntentConfirmBubble\(\s*withoutPendingItems,\s*activeIntentCorrection\.taskId,\s*replacementIntentConfirmBubbleItem,\s*\);/s,
+  );
+  assert.match(
+    coordinatorSource,
+    /activeIntentCorrection\?\.taskId === normalizedTaskId[\s\S]*snapshotRef\.current\.inputValue\.trim\(\) !== ""[\s\S]*void handlePrimaryAction\("submit"\);/,
+  );
   assert.match(coordinatorSource, /const pendingAgentBubbleItem = createShellBallAgentLoadingBubbleItem\(\{/);
   assert.match(coordinatorSource, /const pendingIntentCorrectionTaskIdsRef = useRef\(new Set<string>\(\)\);/);
   assert.match(coordinatorSource, /getConversationSessionIdForTask\(normalizedTaskId\)/);
-  assert.match(coordinatorSource, /sessionIdOverride: intentBubble\?\.desktop\.intentConfirm\?\.sessionId,/);
-  assert.match(coordinatorSource, /pageContextOverride: intentBubble\?\.desktop\.intentConfirm\?\.pageContext,/);
   assert.match(coordinatorSource, /const carriedPageContext = currentIntentCorrection\?\.taskId === normalizedTaskId/);
   assert.match(coordinatorSource, /\?\? carriedPageContext/);
+  assert.match(coordinatorSource, /const carriedFiles = currentIntentCorrection\?\.taskId === normalizedTaskId/);
   assert.match(
     coordinatorSource,
     /setShellBallIntentConfirmStatus\(\s*currentItems,\s*activeIntentCorrection\.taskId,\s*"submitting",?\s*\)/,
   );
-  assert.match(coordinatorSource, /const continuedOriginalTask = result\.task\.task_id === activeIntentCorrection\.taskId;/);
-  assert.match(coordinatorSource, /if \(continuedOriginalTask\) \{\s*nextItems = setShellBallIntentConfirmBubbleHidden\(/s);
+  assert.match(
+    coordinatorSource,
+    /if \(rememberedTaskFiles\.length > 0\) \{\s*shellBallTaskFilesRef\.current\.set\(resultTask\.task_id, \[\.\.\.rememberedTaskFiles\]\);\s*\}/s,
+  );
+  assert.match(
+    coordinatorSource,
+    /return setShellBallIntentConfirmMetadata\(replacedItems, resultTask\.task_id, \{\s*files: rememberedTaskFiles,\s*\}\);/s,
+  );
+  assert.match(coordinatorSource, /handlersRef\.current\.setInputValue\(""\);/);
+  assert.match(coordinatorSource, /handlersRef\.current\.onRequestInputFocus\(\);/);
+  assert.match(coordinatorSource, /function createShellBallIntentCorrectionUnsupportedBubbleItem\(input: \{/);
+  assert.match(
+    coordinatorSource,
+    /Natural-language intent correction is waiting on backend support\. The original confirmation is still pending\./,
+  );
+  assert.match(
+    correctionBranchSource,
+    /const nextItems = setShellBallIntentConfirmStatus\([\s\S]*activeIntentCorrection\.taskId,\s*"idle",/s,
+  );
+  assert.match(
+    correctionBranchSource,
+    /createShellBallIntentCorrectionUnsupportedBubbleItem\(\{\s*createdAt: new Date\(\)\.toISOString\(\),\s*taskId: activeIntentCorrection\.taskId,/s,
+  );
+  assert.match(
+    coordinatorSource,
+    /if \(submittedFiles\.length > 0\) \{\s*shellBallTaskFilesRef\.current\.set\(task\.task_id, \[\.\.\.submittedFiles\]\);\s*\}/s,
+  );
+  assert.match(
+    coordinatorSource,
+    /return task\s*\?\s*setShellBallIntentConfirmMetadata\(replacedItems, task\.task_id, \{\s*files: submittedFiles,\s*\}\)\s*:\s*replacedItems;/s,
+  );
   assert.match(coordinatorSource, /pendingIntentCorrectionTaskIdsRef\.current\.delete\(activeIntentCorrection\.taskId\);/);
   assert.match(coordinatorSource, /pendingIntentCorrectionTaskIdsRef\.current\.has\(normalizedTaskId\)/);
   assert.match(bubbleMessageSource, /disabled=\{intentConfirmBusy\}/);
-  assert.doesNotMatch(correctionSubmitPrefix, /bindTaskToBubbleTurn\(activeIntentCorrection\.taskId, turnIndex\);/);
-  assert.doesNotMatch(correctionSubmitPrefix, /setShellBallIntentConfirmBubbleHidden\(currentItems, activeIntentCorrection\.taskId, true\)/);
+  assert.match(coordinatorSource, /handlersRef\.current\.setInputValue\(""\);\s*handlersRef\.current\.onRequestInputFocus\(\);/s);
+  assert.doesNotMatch(correctionBranchSource, /bindTaskToBubbleTurn\(activeIntentCorrection\.taskId, turnIndex\);/);
+  assert.doesNotMatch(correctionBranchSource, /setShellBallIntentConfirmBubbleHidden\(currentItems, activeIntentCorrection\.taskId, true\)/);
+  assert.doesNotMatch(correctionBranchSource, /const confirmResult = await rpcMethods\.confirmTask\(/);
+  assert.doesNotMatch(correctionBranchSource, /const shouldRestartCorrectionFromFiles = rememberedTaskFiles\.length > 0;/);
+  assert.doesNotMatch(correctionBranchSource, /startTaskFromFiles\(/);
+  assert.doesNotMatch(correctionBranchSource, /controlTask\(/);
+  assert.doesNotMatch(correctionBranchSource, /const result = await submitTextInput\(\{/);
+  assert.doesNotMatch(correctionBranchSource, /sessionId: activeIntentCorrection\.sessionId,/);
+  assert.doesNotMatch(correctionBranchSource, /disableSessionFallback: true,/);
+  assert.doesNotMatch(correctionBranchSource, /pageContext: activeIntentCorrection\.pageContext,/);
+  assert.doesNotMatch(correctionBranchSource, /disableForegroundContextEnrichment: true,/);
+  assert.doesNotMatch(correctionBranchSource, /const continuedOriginalTask = resultTask\.task_id === activeIntentCorrection\.taskId;/);
+  assert.doesNotMatch(coordinatorSource, /handleRefineIntentBubble/);
+  assert.doesNotMatch(appSource, /handleCoordinatorRefineIntentBubble/);
+  assert.doesNotMatch(bubbleMessageSource, /Modify intent/);
+  assert.doesNotMatch(bubbleMessageSource, /data-bubble-action="refine_intent"/);
+  assert.doesNotMatch(coordinatorSource, /autoConfirmIntentCorrectionTaskIdsRef/);
   assert.doesNotMatch(coordinatorSource, /const correctedIntent = parseShellBallIntentCorrection\(submittedText\);/);
 });
 
@@ -9907,6 +10065,7 @@ test("shell-ball inline input preserves readonly snapshots and only upgrades hid
     resolveShellBallInlineInputMode({
       shouldRenderInlineInput: true,
       snapshotInputBarMode: "readonly",
+      forceReadonly: false,
     }),
     "readonly",
   );
@@ -9914,6 +10073,15 @@ test("shell-ball inline input preserves readonly snapshots and only upgrades hid
     resolveShellBallInlineInputMode({
       shouldRenderInlineInput: true,
       snapshotInputBarMode: "interactive",
+      forceReadonly: true,
+    }),
+    "readonly",
+  );
+  assert.equal(
+    resolveShellBallInlineInputMode({
+      shouldRenderInlineInput: true,
+      snapshotInputBarMode: "interactive",
+      forceReadonly: false,
     }),
     "interactive",
   );
@@ -9921,6 +10089,7 @@ test("shell-ball inline input preserves readonly snapshots and only upgrades hid
     resolveShellBallInlineInputMode({
       shouldRenderInlineInput: true,
       snapshotInputBarMode: "hidden",
+      forceReadonly: false,
     }),
     "interactive",
   );
@@ -9928,6 +10097,7 @@ test("shell-ball inline input preserves readonly snapshots and only upgrades hid
     resolveShellBallInlineInputMode({
       shouldRenderInlineInput: false,
       snapshotInputBarMode: "readonly",
+      forceReadonly: true,
     }),
     "hidden",
   );
