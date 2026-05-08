@@ -1,7 +1,11 @@
-// Keep desktop storage access SSR-safe so contract tests and non-DOM entry
-// points can import the module without crashing on `window`.
-function resolveLocalStorage(): Storage | null {
-  if (typeof window === "undefined") {
+/**
+ * Provides local renderer storage helpers.
+ *
+ * These helpers must stay SSR-safe because several contract tests render desktop
+ * entry points in a Node environment without a browser `window`.
+ */
+function readLocalStorage(): Storage | null {
+  if (typeof window === "undefined" || typeof window.localStorage === "undefined") {
     return null;
   }
 
@@ -13,18 +17,41 @@ function resolveLocalStorage(): Storage | null {
 }
 
 export function loadStoredValue<T>(key: string): T | null {
-  const rawValue = resolveLocalStorage()?.getItem(key);
+  const localStorage = readLocalStorage();
+  if (localStorage === null) {
+    return null;
+  }
+
+  const rawValue = localStorage.getItem(key);
   if (!rawValue) {
     return null;
   }
 
-  return JSON.parse(rawValue) as T;
+  try {
+    return JSON.parse(rawValue) as T;
+  } catch (error) {
+    console.warn("[storage] Failed to parse localStorage value", { key, error });
+    return null;
+  }
 }
 
+/**
+ * Persists a JSON-serializable value when browser storage is available.
+ */
 export function saveStoredValue<T>(key: string, value: T) {
-  resolveLocalStorage()?.setItem(key, JSON.stringify(value));
+  const localStorage = readLocalStorage();
+  if (localStorage === null) {
+    return;
+  }
+
+  localStorage.setItem(key, JSON.stringify(value));
 }
 
 export function removeStoredValue(key: string) {
-  resolveLocalStorage()?.removeItem(key);
+  const localStorage = readLocalStorage();
+  if (localStorage === null) {
+    return;
+  }
+
+  localStorage.removeItem(key);
 }
